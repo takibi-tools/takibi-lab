@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TAKIBI labの活動概要。AI出力検品ツール『よみとき』と、日本の季節を題材にした短編Web作品を制作しています。">
+  <meta name="theme-color" content="#f6f3ec">
+  <title>TAKIBI lab｜活動概要</title>
+  <style>
+    :root {
+      --paper: #f6f3ec;
+      --card: #fffdf8;
+      --ink: #20231f;
+      --muted: #656a64;
+      --line: #d8d5cc;
+      --accent: #a33d2d;
+      --accent-dark: #76291f;
+      --green: #264c3a;
+      --max: 980px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; }
+    a:focus-visible {
+      outline: 3px solid rgba(163, 61, 45, .35);
+      outline-offset: 4px;
+    }
+
+    .wrap {
+      width: min(calc(100% - 36px), var(--max));
+      margin-inline: auto;
+    }
+
+    header {
+      padding: 34px 0 26px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      margin: 0;
+      font-size: clamp(22px, 4vw, 32px);
+      letter-spacing: .04em;
+      line-height: 1.2;
+    }
+
+    .label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .intro {
+      max-width: 720px;
+      margin: 18px 0 0;
+      font-size: clamp(16px, 2.2vw, 19px);
+      font-weight: 650;
+      line-height: 1.65;
+    }
+
+    .current {
+      max-width: 760px;
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    main { padding: 42px 0 64px; }
+
+    section + section { margin-top: 58px; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 29px);
+      letter-spacing: .02em;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .primary {
+      padding: clamp(24px, 5vw, 44px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-left: 6px solid var(--accent);
+      border-radius: 8px;
+      box-shadow: 0 14px 34px rgba(39, 36, 29, .05);
+    }
+
+    .primary .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .14em;
+    }
+
+    .primary h3 {
+      margin: 0;
+      font-size: clamp(30px, 7vw, 52px);
+      line-height: 1.15;
+      letter-spacing: .08em;
+    }
+
+    .primary .tagline {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 2.3vw, 18px);
+      font-weight: 650;
+    }
+
+    .primary .description {
+      max-width: 720px;
+      margin: 22px 0 0;
+      font-size: 15px;
+    }
+
+    .axes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .axes li {
+      padding: 5px 9px;
+      background: #f3eee5;
+      border: 1px solid #ded6ca;
+      border-radius: 999px;
+      color: #504d47;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 10px 18px;
+      border: 1px solid var(--ink);
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .button.primary-link {
+      color: #fff;
+      background: var(--ink);
+    }
+
+    .button:hover { transform: translateY(-1px); }
+
+    .works {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .work {
+      display: flex;
+      min-height: 138px;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      text-decoration: none;
+      transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+
+    a.work:hover {
+      border-color: #9c998f;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(39, 36, 29, .06);
+    }
+
+    .work-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .work h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .work p {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .work .credit {
+      margin-top: 6px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status {
+      flex: 0 0 auto;
+      padding: 3px 7px;
+      border: 1px solid #b9c7bd;
+      border-radius: 999px;
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      line-height: 1.5;
+    }
+
+    .status.progress {
+      border-color: #d6c19c;
+      color: #76551d;
+    }
+
+    .open {
+      margin-top: 17px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .version-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 17px;
+    }
+
+    .version-links a {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .version-links a:hover {
+      border-color: var(--accent);
+      background: #fff8f1;
+    }
+
+    .work.disabled {
+      background: rgba(255, 253, 248, .55);
+    }
+
+    .work.disabled .open { color: var(--muted); }
+
+    .process {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 12px;
+    }
+
+    .process-card {
+      padding: 22px;
+      background: transparent;
+      border-top: 2px solid var(--ink);
+    }
+
+    .process-card h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .process-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .process-card strong { color: var(--ink); }
+
+    footer {
+      padding: 26px 0 40px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+    }
+
+    footer a { font-weight: 800; }
+
+    @media (max-width: 700px) {
+      .works, .process { grid-template-columns: 1fr; }
+      .brand-row, .section-head, footer .wrap {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .section-head { gap: 4px; }
+      main { padding-top: 32px; }
+      section + section { margin-top: 46px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<!--
+  公開リンク（2026-07-30更新）
+  よみとき: https://takibi-tools.github.io/yomitoki/
+  夏越の大祓: https://takibi-nagoshi.netlify.app/
+  七夕（Claude Opus 4.8版）: https://takibi-tanabata-opus48.netlify.app/
+  七夕（GPT-5.5版）: https://takibi-lab-tanabata-gpt.netlify.app/
+  海: https://takibi-tools.github.io/keshiki/umi/
+  かき氷（日本語）: https://takibi-kakigori.netlify.app/
+  風の鈴: https://takibi-kaze-no-suzu.netlify.app/
+  線香花火: https://takibi-senko-hanabi.netlify.app/
+  灯籠流し: https://takibi-tourou-nagashi.netlify.app/
+-->
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand-row">
+        <h1 class="brand">TAKIBI lab</h1>
+        <p class="label">Human × AI Creative Studio</p>
+      </div>
+      <p class="intro">生成AIの出力を検品する道具と、日本の季節を触って味わう短編Web作品をつくっています。</p>
+      <p class="current">現在は「よみとき」の検証・公開と、2026年夏の季節作品シリーズを進行中です。</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section aria-labelledby="yomitoki-title">
+      <div class="section-head">
+        <h2 id="yomitoki-title">01｜よみとき</h2>
+        <p>現在の中心活動</p>
+      </div>
+
+      <article class="primary">
+        <p class="eyebrow">AI OUTPUT INSPECTION TOOL</p>
+        <h3>よみとき</h3>
+        <p class="tagline">AIの返答を、測り直す。</p>
+        <p class="description">AIの返答を8つの軸で分解し、事実・推論・意見を見分けながら、根拠のない断定や過剰な肯定を検品。本来あるべき温度の文へ組み直すWebツールです。</p>
+        <ul class="axes" aria-label="検品する8つの軸">
+          <li>事実</li><li>推論</li><li>意見</li><li>励まし</li>
+          <li>根拠なき断定</li><li>過剰肯定</li><li>過剰な未来予測</li><li>出典なき権威</li>
+        </ul>
+        <div class="button-row">
+          <a class="button primary-link" href="https://takibi-tools.github.io/yomitoki/" target="_blank" rel="noopener">よみときを開く →</a>
+        </div>
+      </article>
+    </section>
+
+    <section aria-labelledby="season-title">
+      <div class="section-head">
+        <h2 id="season-title">02｜季節作品</h2>
+        <p>公開7作品・制作中1作品</p>
+      </div>
+
+      <div class="works">
+        <a class="work" href="https://takibi-nagoshi.netlify.app/" target="_blank" rel="noopener">
+          <div>
+            <div class="work-top"><h3>夏越の大祓</h3><span class="status">公開中</span></div>
+            <p>茅の輪にそっと触れて、夏越の夜をひらく。</p>
+            <p class="credit">制作協働｜Claude Opus 4.8・GPT-5.5</p>
+          </div>
+          <span class="open">作品を開く →</span>
+        </a>
+
+        <article class="work">
+          <div>
+            <div class="work-top"><h3>七夕</h3><span class="status">公開中</span></div>
+            <p>短冊に願いを結び、夜空へ預ける。</p>
+            <p class="credit">同じテーマを異なるAIパートナーで実装・比較</p>
+          </div>
+          <div class="version-links">
+            <a href="https://takibi-tanabata-opus48.netlify.app/" target="_blank" rel="noopener">Claude Opus 4.8版 ↗</a>
+            <a href="https://takibi-lab-tanabata-gpt.netlify.app/" target="_blank" rel="noopener">GPT-5.5版 ↗</a>
+          </div>
+        </article>
+
+        <a class="work" href="https://takibi-tools.github.io/keshiki/umi/" target="_blank" rel="noopener">
+          <div>
+            <div class="work-top"><h3>海の日</h3><span class="status">公開中</span></div>
+            <p>波と光の変化を、音と動きでたどる。</p>
+            <p class="credit">制作協働｜Fable 5</p>
+          </div>
+          <span class="open">作品を開く →</span>
+        </a>
+
+        <a class="work" href="https://takibi-kakigori.netlify.app/" target="_blank" rel="noopener">
+          <div>
+            <div class="work-top"><h3>かき氷</h3><span class="status">公開中</span></div>
+            <p>氷を削り、五つのシロップを自由に重ねる。</p>
+            <p class="credit">制作協働｜Fable 5・GPT-5.6・Gemini 3.5 Flash</p>
+          </div>
+          <span class="open">日本語版を開く ↗</span>
+        </a>
+
+        <a class="work" href="https://takibi-kaze-no-suzu.netlify.app/" target="_blank" rel="noopener">
+          <div>
+            <div class="work-top"><h3>風の鈴</h3><span class="status">公開中</span></div>
+            <p>風鈴を揺らし、音と短冊の動きを楽しむ。</p>
+            <p class="credit">制作協働｜GPT-5.6</p>
+          </div>
+          <span class="open">作品を開く ↗</span>
+        </a>
+
+        <a class="work" href="https://takibi-tourou-nagashi.netlify.app/" target="_blank" rel="noopener">
+          <div>
+            <div class="work-top"><h3>灯籠流し</h3><span class="status">公開中</span></div>
+            <p>灯りに言葉を託し、静かな水面へ流す。</p>
+            <p class="credit">制作協働｜Fable 5</p>
+          </div>
+          <span class="open">作品を開く →</span>
+        </a>
+
+        <a class="work" href="https://takibi-senko-hanabi.netlify.app/" target="_blank" rel="noopener">
+          <div>
+            <div class="work-top"><h3>線香花火</h3><span class="status">公開中</span></div>
+            <p>火花の変化と、消えるまでの時間を見つめる。</p>
+            <p class="credit">制作協働｜Claude Opus 4.8・GPT-5.5</p>
+          </div>
+          <span class="open">作品を開く →</span>
+        </a>
+
+        <article class="work disabled" aria-label="ラムネ 制作中">
+          <div>
+            <div class="work-top"><h3>ラムネ</h3><span class="status progress">制作中</span></div>
+            <p>ビー玉を押し、泡と音で夏の一杯をひらく。</p>
+          </div>
+          <span class="open">近日公開</span>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="process-title">
+      <div class="section-head">
+        <h2 id="process-title">03｜制作体制</h2>
+        <p>小さく試し、公開して確かめる</p>
+      </div>
+      <div class="process">
+        <div class="process-card">
+          <h3>企画・検証｜サオリ（TAKIBI lab）</h3>
+          <p><strong>テーマ、体験設計、評価基準を決め、実機で検証。</strong>違和感を言語化し、完成まで修正を重ねます。</p>
+        </div>
+        <div class="process-card">
+          <h3>実装｜AIパートナーと協働</h3>
+          <p>コード、画像、音、動きの実装をAIパートナーと進め、人が最終判断を担います。同じ企画を異なるモデルで実装し、表現や挙動を比較・検証する場合もあります。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© 2026 TAKIBI lab</span>
+      <a href="https://takibilab.itch.io/" target="_blank" rel="noopener">itch.io 作品ページ ↗</a>
+    </div>
+  </footer>
+</body>
+</html>
