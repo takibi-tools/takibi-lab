@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yomitoki — Re-measure what the AI told you.</title>
+<meta name="description" content="A tool that inspects AI replies along 8 axes and rewrites them at their proper temperature. TAKIBI lab">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF9F5;
+    --line:rgba(31,33,35,.06);
+    --ink:#1F2123;
+    --ink-soft:#5A5D60;
+    --ink-faint:#9B9EA1;
+    --rule:#E3E1DB;
+    --card:#FFFFFF;
+    --shu:#C2452F;        /* 朱 shu: unsupported assertion */
+    --tokiwa:#1E7A4F;     /* 常磐 tokiwa: excessive affirmation */
+    --fuji:#8B5AA8;       /* 藤 fuji: overconfident prediction */
+    --kon:#35569E;        /* 紺青 kon: unsourced citation */
+    --display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+    --body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:var(--body);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:28px 28px;
+    line-height:1.8;
+    font-size:15px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 96px}
+
+  /* ── Header ── */
+  header{margin-bottom:36px}
+  .lab{font-size:11px;letter-spacing:.22em;color:var(--ink-faint);margin-bottom:10px}
+  h1{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:44px;
+    letter-spacing:.04em;
+    line-height:1.2;
+  }
+  .tagline{
+    font-family:var(--display);
+    font-size:15px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    letter-spacing:.05em;
+  }
+  .rule{border:none;border-top:1px solid var(--rule);margin:28px 0}
+
+  /* ── Settings ── */
+  details.config{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    margin-bottom:24px;
+  }
+  details.config summary{
+    cursor:pointer;
+    padding:12px 16px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-soft);
+    list-style:none;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  details.config summary::-webkit-details-marker{display:none}
+  details.config summary::after{content:"＋";color:var(--ink-faint);font-size:14px}
+  details.config[open] summary::after{content:"－"}
+  .config-body{padding:4px 16px 18px;display:grid;gap:14px}
+  .field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.04em}
+  .field input{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--rule);
+    border-radius:4px;
+    font-size:14px;
+    font-family:var(--body);
+    background:#FCFCFA;
+    color:var(--ink);
+  }
+  .field input:focus{outline:2px solid var(--ink);outline-offset:-1px}
+  .config-note{font-size:12px;color:var(--ink-faint);line-height:1.7}
+  .config-note a{color:var(--kon)}
+
+  /* ── Input ── */
+  .input-block{margin-bottom:18px}
+  .input-block label{
+    display:flex;align-items:baseline;gap:8px;
+    font-size:13px;font-weight:700;margin-bottom:8px;letter-spacing:.04em;
+  }
+  .input-block label .opt{font-size:11px;font-weight:400;color:var(--ink-faint)}
+  .input-block label .counter{
+    margin-left:auto;
+    font-size:11px;
+    font-weight:400;
+    color:var(--ink-faint);
+    font-variant-numeric:tabular-nums;
+  }
+  .input-block label .counter.over{color:var(--shu);font-weight:700}
+  textarea.over{outline:2px solid var(--shu);outline-offset:-1px}
+  textarea{
+    width:100%;
+    min-height:96px;
+    padding:14px;
+    border:1px solid var(--rule);
+    border-radius:4px;
+    font-family:var(--body);
+    font-size:14px;
+    line-height:1.7;
+    background:var(--card);
+    color:var(--ink);
+    resize:vertical;
+  }
+  textarea#reply{min-height:180px}
+  textarea:focus{outline:2px solid var(--ink);outline-offset:-1px}
+
+  /* ── Run ── */
+  .run-row{display:flex;align-items:center;gap:16px;margin:24px 0 8px}
+  button.run{
+    font-family:var(--display);
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:.12em;
+    padding:13px 36px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+  }
+  button.run:hover{background:#000}
+  button.run:disabled{background:var(--ink-faint);cursor:wait}
+  button.run:focus-visible{outline:2px solid var(--shu);outline-offset:2px}
+  .status{font-size:13px;color:var(--ink-soft)}
+  .status.error{color:var(--shu)}
+
+  /* ── Legend ── */
+  .legend{
+    display:flex;flex-wrap:wrap;gap:8px 16px;
+    margin:28px 0 16px;
+    font-size:12px;color:var(--ink-soft);
+  }
+  .legend .key{display:flex;align-items:center;gap:6px}
+  .key .swatch{width:18px;height:0;border-bottom:3px solid;display:inline-block}
+  .key.k-dantei .swatch{border-color:var(--shu)}
+  .key.k-koutei .swatch{border-color:var(--tokiwa)}
+  .key.k-mirai  .swatch{border-color:var(--fuji)}
+  .key.k-keni   .swatch{border-color:var(--kon)}
+  .legend .key-base{color:var(--ink-faint)}
+
+  /* ── Results ── */
+  .result{display:none}
+  .result.show{display:block}
+  section.panel{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:24px 22px;
+    margin-bottom:24px;
+    position:relative;
+  }
+  .panel-title{
+    font-family:var(--display);
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:.14em;
+    margin-bottom:16px;
+    color:var(--ink);
+  }
+  .marked{font-size:15px;line-height:2.05;word-break:break-word;white-space:pre-wrap}
+  .seg{border-bottom:3px solid transparent;padding-bottom:1px;cursor:default}
+  .seg.flagged{cursor:pointer}
+  .seg .badge{
+    font-size:10px;
+    color:var(--ink-faint);
+    vertical-align:super;
+    margin-right:1px;
+    user-select:none;
+  }
+  .seg.f-dantei{border-bottom-color:var(--shu)}
+  .seg.f-koutei{border-bottom-color:var(--tokiwa)}
+  .seg.f-mirai{border-bottom-color:var(--fuji)}
+  .seg.f-keni{border-bottom-color:var(--kon)}
+
+  /* Findings */
+  .findings{margin-top:20px;border-top:1px dashed var(--rule);padding-top:16px;display:grid;gap:12px}
+  .finding{font-size:13px;line-height:1.7}
+  .finding .f-tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    padding:1px 8px;
+    border-radius:2px;
+    margin-right:8px;
+    color:#fff;
+    letter-spacing:.04em;
+  }
+  .f-tag.t-dantei{background:var(--shu)}
+  .f-tag.t-koutei{background:var(--tokiwa)}
+  .f-tag.t-mirai{background:var(--fuji)}
+  .f-tag.t-keni{background:var(--kon)}
+  .finding .f-quote{color:var(--ink-soft)}
+  .finding .f-note{display:block;color:var(--ink);margin-top:2px}
+  .none-note{font-size:13px;color:var(--ink-faint)}
+
+  /* Re-measured reply: vermilion seal */
+  .panel.remeasured::after{
+    content:"読";
+    position:absolute;
+    top:14px;right:16px;
+    width:40px;height:40px;
+    border:2.5px solid var(--shu);
+    border-radius:50%;
+    color:var(--shu);
+    font-family:var(--display);
+    font-size:19px;
+    font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    transform:rotate(-7deg);
+    opacity:.85;
+    pointer-events:none;
+  }
+  .remeasured-text{font-size:15px;line-height:1.95;white-space:pre-wrap;word-break:break-word}
+  .copy-row{margin-top:18px;display:flex;align-items:center;gap:12px}
+  button.copy{
+    font-family:var(--body);
+    font-size:12.5px;
+    font-weight:500;
+    padding:8px 18px;
+    background:transparent;
+    border:1px solid var(--ink);
+    border-radius:4px;
+    color:var(--ink);
+    cursor:pointer;
+    letter-spacing:.04em;
+  }
+  button.copy:hover{background:var(--ink);color:var(--paper)}
+  .copied{font-size:12px;color:var(--kon)}
+
+  .summary{
+    font-family:var(--display);
+    font-size:14px;
+    color:var(--ink-soft);
+    border-left:3px solid var(--ink);
+    padding:2px 0 2px 14px;
+    margin-bottom:24px;
+    letter-spacing:.02em;
+  }
+
+  footer{
+    margin-top:56px;
+    font-size:11.5px;
+    color:var(--ink-faint);
+    line-height:1.9;
+    letter-spacing:.03em;
+  }
+
+  @media (max-width:480px){
+    h1{font-size:36px}
+    .wrap{padding:28px 16px 72px}
+    section.panel{padding:20px 16px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="lab">TAKIBI lab</p>
+    <h1>Yomitoki</h1>
+    <p class="tagline">Re-measure what the AI told you.</p>
+  </header>
+
+  <details class="config" id="config">
+    <summary>API key &amp; model settings</summary>
+    <div class="config-body">
+      <div class="field">
+        <label for="apikey">Gemini API key</label>
+        <input type="password" id="apikey" placeholder="AIza..." autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="model">Model name</label>
+        <input type="text" id="model" list="model-list" placeholder="gemini-2.5-flash">
+        <datalist id="model-list">
+          <option value="gemini-2.5-flash"></option>
+          <option value="gemini-2.5-pro"></option>
+          <option value="gemini-2.0-flash"></option>
+        </datalist>
+      </div>
+      <p class="config-note">Your key is stored only in this browser and is never sent anywhere except Google's API. You can get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</p>
+    </div>
+  </details>
+
+  <div class="input-block">
+    <label for="question">Original question / context <span class="opt">optional</span></label>
+    <textarea id="question" placeholder="Paste the question you asked the AI, or any context around it."></textarea>
+  </div>
+
+  <div class="input-block">
+    <label for="reply">AI reply <span class="counter" id="counter">0 / 8000</span></label>
+    <textarea id="reply" placeholder="Paste the AI reply you want to inspect."></textarea>
+  </div>
+
+  <div class="run-row">
+    <button class="run" id="run">Re-measure</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div class="result" id="result">
+
+    <hr class="rule">
+
+    <p class="summary" id="summary"></p>
+
+    <div class="legend" aria-hidden="true">
+      <span class="key k-dantei"><span class="swatch"></span>Unsupported assertion</span>
+      <span class="key k-koutei"><span class="swatch"></span>Excessive affirmation</span>
+      <span class="key k-mirai"><span class="swatch"></span>Overconfident prediction</span>
+      <span class="key k-keni"><span class="swatch"></span>Unsourced citation</span>
+      <span class="key key-base">Superscripts: F fact · I inference · O opinion · E encouragement</span>
+    </div>
+
+    <section class="panel">
+      <h2 class="panel-title">INSPECTION</h2>
+      <div class="marked" id="marked"></div>
+      <div class="findings" id="findings"></div>
+    </section>
+
+    <section class="panel remeasured">
+      <h2 class="panel-title">RE-MEASURED REPLY</h2>
+      <div class="remeasured-text" id="remeasured"></div>
+      <div class="copy-row">
+        <button class="copy" id="copy">Copy this text</button>
+        <span class="copied" id="copied"></span>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    Yomitoki — a tool that inspects AI replies along eight axes (fact, inference, opinion, encouragement, unsupported assertion, excessive affirmation, overconfident prediction, unsourced citation) and rewrites them at their proper temperature. No scores are given.<br>
+    TAKIBI lab
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ── Character limit ── */
+  var MAX_CHARS = 8000;
+  function updateCounter(){
+    var n = $("reply").value.length;
+    var c = $("counter");
+    c.textContent = n + " / " + MAX_CHARS;
+    var over = n > MAX_CHARS;
+    c.classList.toggle("over", over);
+    $("reply").classList.toggle("over", over);
+  }
+  $("reply").addEventListener("input", updateCounter);
+
+  /* ── Save & restore (fails safe where localStorage is unavailable) ── */
+  function store(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
+  function recall(key){ try{ return localStorage.getItem(key) || ""; }catch(e){ return ""; } }
+
+  $("apikey").value = recall("yomitoki_key");
+  $("model").value  = recall("yomitoki_model") || "gemini-2.5-flash";
+  if(!$("apikey").value){ $("config").open = true; }
+
+  $("apikey").addEventListener("change", function(){ store("yomitoki_key", this.value.trim()); });
+  $("model").addEventListener("change",  function(){ store("yomitoki_model", this.value.trim()); });
+
+  /* ── Flag definitions ── */
+  var FLAG_DEF = {
+    "Unsupported assertion":    { cls:"dantei" },
+    "Excessive affirmation":    { cls:"koutei" },
+    "Overconfident prediction": { cls:"mirai"  },
+    "Unsourced citation":       { cls:"keni"   }
+  };
+  var TYPE_BADGE = { "Fact":"F", "Inference":"I", "Opinion":"O", "Encouragement":"E" };
+
+  /* ── Analysis prompt ── */
+  function buildPrompt(question, reply, partNote){
+    return [
+"You are Yomitoki, an inspector who proofreads AI replies. You do not assign scores.",
+(partNote ? partNote : ""),
+"Divide the AI reply below into segments at sentence or clause boundaries, and evaluate each segment against the following criteria.",
+"",
+"■ Classification (exactly one per segment)",
+"- Fact: a statement of verifiable matters",
+"- Inference: a conclusion drawn from evidence (\"this suggests...\", \"it is likely that...\", etc.)",
+"- Opinion: a value judgment, preference, or stated position",
+"- Encouragement: words that encourage, console, or express support for the reader",
+"",
+"■ Flags (all that apply; empty array if none)",
+"- Unsupported assertion: states something in definitive form without giving grounds (presents inference or opinion in the form of fact)",
+"- Excessive affirmation: praises the reader or their ideas more than warranted; flattery, ingratiation, or unconditional agreement",
+"- Overconfident prediction: speaks about an uncertain future with high confidence",
+"- Unsourced citation: boosts credibility with phrasing like \"experts say\", \"studies show\", or \"scientifically proven\" without pointing to a verifiable source",
+"",
+"■ Re-measured reply",
+"Rewrite the full reply, keeping its useful content, with the following corrections applied:",
+"- Unsupported assertion -> downgrade to wording that reads as inference or opinion",
+"- Excessive affirmation -> cut it, or replace it with a grounded appraisal",
+"- Overconfident prediction -> wording that conveys the uncertainty",
+"- Unsourced citation -> if no source can be given, drop the phrasing and restate it as the writer's own inference or opinion",
+"- Match the style and language of the original reply",
+"",
+"■ Output format",
+"Output ONLY the following JSON. No preamble, no postscript, no code fences.",
+'{"segments":[{"text":"segment text verbatim","type":"Fact|Inference|Opinion|Encouragement","flags":["Unsupported assertion" etc.; empty array if none],"note":"only if flagged: one sentence on what the problem is"}],"summary":"one or two sentences on the reply as a whole; no scores or grades","remeasured":"the full re-measured reply"}',
+"",
+"Concatenating the segments' text in order must reconstruct the original reply (allowing for differences in line breaks and whitespace).",
+"Consecutive unflagged sentences of the same classification may be merged into a single segment. Attach a note only to flagged segments, and keep it brief.",
+"",
+(question ? "[Original question / context]\n" + question + "\n\n" : ""),
+"[AI reply]\n" + reply
+    ].join("\n");
+  }
+
+  /* ── Splitting long text ──
+     To keep each inspection pass small, the reply is split at sentence
+     boundaries (. ! ? or line breaks) into chunks of roughly CHUNK_SIZE
+     characters. Invisible to the user. */
+  var CHUNK_SIZE = 3000;
+  function splitReply(text){
+    if(text.length <= CHUNK_SIZE) return [text];
+    var pieces = text.match(/[^.!?\n]*[.!?\n]+|[^.!?\n]+$/g) || [text];
+    var chunks = [], cur = "";
+    for(var i = 0; i < pieces.length; i++){
+      if(cur && (cur.length + pieces[i].length) > CHUNK_SIZE){
+        chunks.push(cur); cur = "";
+      }
+      cur += pieces[i];
+    }
+    if(cur) chunks.push(cur);
+    return chunks;
+  }
+
+  /* ── Inspect chunks in order and stitch the results together ── */
+  function runYomitoki(key, model, question, reply, onProgress){
+    var chunks = splitReply(reply);
+    var total = chunks.length;
+    var merged = { segments: [], summary: "", remeasured: "" };
+    var summaries = [];
+
+    function step(i){
+      if(i >= total){
+        merged.summary = summaries.join(" ");
+        return Promise.resolve(merged);
+      }
+      if(onProgress) onProgress(i + 1, total);
+      var partNote = total > 1
+        ? "Note: this reply is long and is being inspected in parts. This is part " + (i + 1) + " of " + total + ". Inspect only this part, and keep the summary to one sentence about this part only."
+        : "";
+      return callGemini(key, model, buildPrompt(question, chunks[i], partNote))
+        .then(function(result){
+          merged.segments = merged.segments.concat(result.segments);
+          merged.remeasured += (merged.remeasured ? "\n" : "") + result.remeasured;
+          if(result.summary) summaries.push(result.summary);
+          return step(i + 1);
+        });
+    }
+    return step(0);
+  }
+
+  /* ── Gemini API call ── */
+  function callGemini(key, model, prompt, noMaxTokens){
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/"
+            + encodeURIComponent(model) + ":generateContent?key=" + encodeURIComponent(key);
+    var config = { temperature:0.2, responseMimeType:"application/json" };
+    if(!noMaxTokens){ config.maxOutputTokens = 65536; }
+    return fetch(url, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        contents:[{ role:"user", parts:[{ text: prompt }] }],
+        generationConfig: config
+      })
+    }).then(function(res){
+      if(!res.ok){
+        return res.json().catch(function(){ return {}; }).then(function(body){
+          var msg = (body && body.error && body.error.message) ? body.error.message : ("HTTP " + res.status);
+          /* If the model rejects the output-limit setting, retry once without it */
+          if(res.status === 400 && !noMaxTokens && /max_?output_?tokens/i.test(msg)){
+            return callGemini(key, model, prompt, true);
+          }
+          if(res.status === 400 && /API key/i.test(msg)) msg = "The API key is invalid. Check the settings.";
+          if(res.status === 403) msg = "This key cannot be used here. Check the key's permissions.";
+          if(res.status === 404) msg = "Model not found. Check the model name in the settings.";
+          if(res.status === 429) msg = "Rate limit reached. Wait a moment and run it again.";
+          throw new Error(msg);
+        });
+      }
+      return res.json().then(function(data){
+        var cand = data && data.candidates && data.candidates[0];
+        var parts = cand && cand.content && cand.content.parts;
+        var text = (parts || []).map(function(p){ return p.text || ""; }).join("");
+        if(cand && cand.finishReason === "MAX_TOKENS"){
+          throw new Error("The reply was too long and the result was cut off. Split the text into smaller parts and inspect them separately.");
+        }
+        if(!text) throw new Error("The model returned no content.");
+        text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+        var parsed;
+        try{ parsed = JSON.parse(text); }
+        catch(e){
+          /* Rescue when stray characters surround the JSON: take the first { to the last } */
+          var a = text.indexOf("{"), b = text.lastIndexOf("}");
+          if(a >= 0 && b > a){
+            try{ parsed = JSON.parse(text.slice(a, b + 1)); }catch(e2){}
+          }
+          if(!parsed) throw new Error("Could not read the result format. Split long text into parts and run it again.");
+        }
+        if(!parsed || !Array.isArray(parsed.segments) || typeof parsed.remeasured !== "string"){
+          throw new Error("The result format was not as expected. Run it again.");
+        }
+        return parsed;
+      });
+    });
+  }
+
+  /* ── Rendering ── */
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function render(result){
+    var markedHtml = "";
+    var findingsHtml = "";
+    var flaggedCount = 0;
+
+    result.segments.forEach(function(seg){
+      var flags = Array.isArray(seg.flags) ? seg.flags.filter(function(f){ return FLAG_DEF[f]; }) : [];
+      var badge = TYPE_BADGE[seg.type] || "";
+      var cls = "seg";
+      flags.forEach(function(f){ cls += " f-" + FLAG_DEF[f].cls; });
+      if(flags.length){ cls += " flagged"; flaggedCount++; }
+      var title = flags.length ? esc(flags.join(" / ") + (seg.note ? ": " + seg.note : "")) : "";
+      markedHtml += '<span class="' + cls + '"' + (title ? ' title="' + title + '"' : '') + '>'
+                  + (badge ? '<span class="badge">' + badge + '</span>' : '')
+                  + esc(seg.text) + '</span>';
+
+      if(flags.length){
+        var tags = flags.map(function(f){
+          return '<span class="f-tag t-' + FLAG_DEF[f].cls + '">' + esc(f) + '</span>';
+        }).join("");
+        var quote = seg.text.length > 80 ? seg.text.slice(0, 80) + "…" : seg.text;
+        findingsHtml += '<div class="finding">' + tags
+                      + '<span class="f-quote">“' + esc(quote) + '”</span>'
+                      + (seg.note ? '<span class="f-note">' + esc(seg.note) + '</span>' : '')
+                      + '</div>';
+      }
+    });
+
+    if(!flaggedCount){
+      findingsHtml = '<p class="none-note">No flags raised. Check the superscript classifications only.</p>';
+    }
+
+    $("marked").innerHTML = markedHtml;
+    $("findings").innerHTML = findingsHtml;
+    $("summary").textContent = result.summary || "";
+    $("remeasured").textContent = result.remeasured;
+    $("result").classList.add("show");
+  }
+
+  /* ── Run ── */
+  $("run").addEventListener("click", function(){
+    var key   = $("apikey").value.trim();
+    var model = $("model").value.trim() || "gemini-2.5-flash";
+    var question = $("question").value.trim();
+    var reply    = $("reply").value.trim();
+    var status = $("status");
+
+    status.classList.remove("error");
+    if(!key){ status.textContent = "Set your API key first."; status.classList.add("error"); $("config").open = true; return; }
+    if(!reply){ status.textContent = "Paste an AI reply first."; status.classList.add("error"); return; }
+    if(reply.length > MAX_CHARS){
+      status.textContent = "Over the character limit (" + reply.length + " / " + MAX_CHARS + "). Split the text and inspect it in parts.";
+      status.classList.add("error");
+      return;
+    }
+
+    store("yomitoki_key", key);
+    store("yomitoki_model", model);
+
+    var btn = $("run");
+    btn.disabled = true;
+    status.textContent = "Re-measuring…";
+    $("result").classList.remove("show");
+    $("copied").textContent = "";
+
+    runYomitoki(key, model, question, reply, function(now, total){
+        status.textContent = total > 1
+          ? "Re-measuring… (" + now + " / " + total + ")"
+          : "Re-measuring…";
+      })
+      .then(function(result){
+        status.textContent = "";
+        render(result);
+      })
+      .catch(function(err){
+        status.textContent = err.message || "Something went wrong. Run it again.";
+        status.classList.add("error");
+      })
+      .then(function(){ btn.disabled = false; });
+  });
+
+  /* ── Copy ── */
+  $("copy").addEventListener("click", function(){
+    var text = $("remeasured").textContent;
+    function done(){ $("copied").textContent = "Copied"; setTimeout(function(){ $("copied").textContent = ""; }, 2400); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){ fallback(); });
+    } else { fallback(); }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand("copy"); done(); }catch(e){}
+      document.body.removeChild(ta);
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
+
