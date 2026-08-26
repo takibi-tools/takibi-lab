@@ -60,9 +60,15 @@
       line-height: 1.2;
     }
 
-    .brand img {
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .footer-logo {
       display: block;
-      width: clamp(112px, 18vw, 142px);
+      width: 88px;
       height: auto;
     }
 
@@ -368,7 +374,7 @@
   <header>
     <div class="wrap">
       <div class="brand-row">
-        <h1 class="brand"><img src="./assets/takibi-logo-lockup.svg" alt="TAKIBI lab"></h1>
+        <h1 class="brand">TAKIBI.lab</h1>
         <p class="label">Human × AI Creative Studio</p>
       </div>
       <p class="intro">生成AIの出力を検品する道具と、日本の季節を触って味わう短編Web作品をつくっています。</p>
@@ -456,7 +462,10 @@
 
   <footer>
     <div class="wrap">
-      <span>© 2026 TAKIBI.lab</span>
+      <div class="footer-brand">
+        <img class="footer-logo" src="./assets/takibi-logo-lockup.svg" alt="TAKIBI lab">
+        <span>© 2026 TAKIBI.lab</span>
+      </div>
       <a href="https://takibilab.itch.io/" target="_blank" rel="noopener">itch.io 作品ページ ↗</a>
     </div>
   </footer>
