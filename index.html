@@ -60,6 +60,12 @@
       line-height: 1.2;
     }
 
+    .brand img {
+      display: block;
+      width: clamp(112px, 18vw, 142px);
+      height: auto;
+    }
+
     .label {
       margin: 0;
       color: var(--muted);
@@ -362,7 +368,7 @@
   <header>
     <div class="wrap">
       <div class="brand-row">
-        <h1 class="brand">TAKIBI.lab</h1>
+        <h1 class="brand"><img src="./assets/takibi-logo-lockup.svg" alt="TAKIBI lab"></h1>
         <p class="label">Human × AI Creative Studio</p>
       </div>
       <p class="intro">生成AIの出力を検品する道具と、日本の季節を触って味わう短編Web作品をつくっています。</p>
@@ -433,7 +439,7 @@
     <section aria-labelledby="process-title">
       <div class="section-head">
         <h2 id="process-title">03｜制作体制</h2>
-        <p>小さく試し、公開して確かめる</p>
+
       </div>
       <div class="process">
         <div class="process-card">
