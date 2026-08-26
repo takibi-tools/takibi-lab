@@ -60,13 +60,14 @@
       line-height: 1.2;
     }
 
-    .footer-brand {
+    .header-meta {
       display: flex;
-      align-items: center;
-      gap: 14px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
     }
 
-    .footer-logo {
+    .header-logo {
       display: block;
       width: 88px;
       height: auto;
@@ -353,6 +354,7 @@
         align-items: flex-start;
         flex-direction: column;
       }
+      .header-meta { align-items: flex-start; }
       .section-head { gap: 4px; }
       main { padding-top: 32px; }
       section + section { margin-top: 46px; }
@@ -375,7 +377,10 @@
     <div class="wrap">
       <div class="brand-row">
         <h1 class="brand">TAKIBI.lab</h1>
-        <p class="label">Human × AI Creative Studio</p>
+        <div class="header-meta">
+          <p class="label">Human × AI Creative Studio</p>
+          <img class="header-logo" src="./assets/takibi-logo-lockup.svg" alt="TAKIBI lab">
+        </div>
       </div>
       <p class="intro">生成AIの出力を検品する道具と、日本の季節を触って味わう短編Web作品をつくっています。</p>
       <p class="current">現在は「よみとき」の検証・公開と、2026年夏の季節作品シリーズを進行中です。</p>
@@ -462,10 +467,7 @@
 
   <footer>
     <div class="wrap">
-      <div class="footer-brand">
-        <img class="footer-logo" src="./assets/takibi-logo-lockup.svg" alt="TAKIBI lab">
-        <span>© 2026 TAKIBI.lab</span>
-      </div>
+      <span>© 2026 TAKIBI.lab</span>
       <a href="https://takibilab.itch.io/" target="_blank" rel="noopener">itch.io 作品ページ ↗</a>
     </div>
   </footer>
