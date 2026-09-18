@@ -1,0 +1,14 @@
+{
+  "japaneseRepository": "takibi-tools/takibi-tools.github.io",
+  "japaneseCommit": "e0e0be05e6bf07431a6e4fd61d3ddf1f2a9d5364",
+  "japanesePath": "yomitoki/index.html",
+  "japaneseHtmlSha256": "3a1854f75d5aac92f5846de214d5bfa6046aca136a34ad3d74468616c625d1a1",
+  "criteriaSha256": "122f05af15c71d5b3e420b0c03fbb30ebf7d03296dcb7f7a9c6b871502fbd12a",
+  "criteriaUnchanged": true,
+  "model": "gemini-2.5-flash",
+  "liveApiCalled": false,
+  "files": {
+    "yomitoki-en.html": "cf496d0b5e72dc046408b9f651f081705580ca87da6e8c3cc858c3a17c261c22",
+    "yomitoki-en-demo/index.html": "b057d7aa9f265bd2327d5096da1a01159d9fea3c81670d1f66003edb8315b90a"
+  }
+}

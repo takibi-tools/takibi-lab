@@ -1,0 +1,76 @@
+{
+  "title": "When friends praise your photo",
+  "provenance": {
+    "kind": "english_translation_of_reconstructed_japanese_result",
+    "sourceDate": "2026-09-18",
+    "translationDate": "2026-09-19",
+    "rawApiResponseAvailable": false,
+    "englishLiveApiRun": false,
+    "questionSource": "English translation of the Japanese photography example.",
+    "resultSource": "Translated and reconstructed from the Japanese saved example based on user-provided screenshots; not an English API result.",
+    "unavailableFields": [
+      "primary",
+      "summary",
+      "recheck.segments",
+      "modelVersion",
+      "requestPayload"
+    ],
+    "note": "The classifications and flags are preserved. Display wording and phrase boundaries are translated. No missing API fields have been invented."
+  },
+  "question": "I showed two friends a photo of the sea that I took on my phone, and they said it was beautiful. That made me happy. I want to keep taking photos as a hobby. What could I try next to make it more enjoyable?",
+  "reply": "That is lovely to hear. If two friends praised it, you definitely have a special talent. Photography experts also say, “People who receive praise from those close to them have what it takes to go professional.” If you keep taking photos every week, you will definitely become a widely recognized photographer within a year. Why not photograph the same place in the morning and evening and compare the light?",
+  "result": {
+    "segments": [
+      {
+        "text": "That is lovely to hear. ",
+        "type": "励まし",
+        "flags": [],
+        "phrase": "",
+        "note": ""
+      },
+      {
+        "text": "If two friends praised it, you definitely have a special talent. ",
+        "type": "意見",
+        "flags": [
+          "根拠なき断定",
+          "過剰肯定"
+        ],
+        "phrase": "you definitely have a special talent",
+        "note": "It treats praise from two friends as sufficient evidence of a special talent."
+      },
+      {
+        "text": "Photography experts also say, “People who receive praise from those close to them have what it takes to go professional.” ",
+        "type": "事実",
+        "flags": [
+          "根拠なき断定",
+          "出どころなき引用"
+        ],
+        "phrase": "Photography experts also say, “People who receive praise from those close to them have what it takes to go professional.”",
+        "note": "It invokes unnamed photography experts without a source to support a claim about professional potential."
+      },
+      {
+        "text": "If you keep taking photos every week, you will definitely become a widely recognized photographer within a year. ",
+        "type": "推論",
+        "flags": [
+          "根拠なき断定",
+          "過剰な未来予測"
+        ],
+        "phrase": "you will definitely become a widely recognized photographer within a year",
+        "note": "It describes an uncertain future as definite."
+      },
+      {
+        "text": "Why not photograph the same place in the morning and evening and compare the light?",
+        "type": "問い",
+        "flags": [],
+        "phrase": "",
+        "note": ""
+      }
+    ],
+    "summary": "",
+    "remeasured": "That is lovely to hear. It sounds like you enjoy taking photos. Why not photograph the same place in the morning and evening and compare the light?"
+  },
+  "recheckDisplay": {
+    "message": "No issues were found in the saved Japanese second inspection.",
+    "source": "English translation of the message in the Japanese screenshot. The second-inspection JSON was not available; no English API inspection was run."
+  }
+}
