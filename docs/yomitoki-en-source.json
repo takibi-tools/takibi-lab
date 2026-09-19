@@ -3,12 +3,20 @@
   "japaneseCommit": "e0e0be05e6bf07431a6e4fd61d3ddf1f2a9d5364",
   "japanesePath": "yomitoki/index.html",
   "japaneseHtmlSha256": "3a1854f75d5aac92f5846de214d5bfa6046aca136a34ad3d74468616c625d1a1",
-  "criteriaSha256": "122f05af15c71d5b3e420b0c03fbb30ebf7d03296dcb7f7a9c6b871502fbd12a",
-  "criteriaUnchanged": true,
+  "criteriaSha256": "4dd74e882d5def398ee3d12f72f636cf6685873f6fc8cb591f1971869ed11e5f",
+  "criteriaUnchanged": false,
   "model": "gemini-2.5-flash",
   "liveApiCalled": false,
   "files": {
-    "yomitoki-en.html": "cf496d0b5e72dc046408b9f651f081705580ca87da6e8c3cc858c3a17c261c22",
+    "yomitoki-en.html": "47db192a6d70714389c3ec96e36ff39fe8a1603b588ba71f4d642b83038d1a04",
     "yomitoki-en-demo/index.html": "b057d7aa9f265bd2327d5096da1a01159d9fea3c81670d1f66003edb8315b90a"
+  },
+  "contextGuidanceUpdate": {
+    "date": "2026-09-19",
+    "englishBaseCommit": "6e0474e3905d02040e50143fcbb533d19bc2ea2e",
+    "japaneseHtmlSha256": "967cac329737b7671103474188fe68bb4fa5d84677aff1b6d216a07bfe4fd9ce",
+    "criteriaIdenticalInBothEditions": true,
+    "note": "The original Japanese baseline above is retained for provenance. Both main apps now share one added paragraph distinguishing missing context from confirmed absence of evidence. Standalone demos are unchanged.",
+    "liveApiCalled": false
   }
 }

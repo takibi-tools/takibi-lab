@@ -1,10 +1,10 @@
 # Yomitoki — English edition
 
-This edition follows the Japanese release at commit `e0e0be05e6bf07431a6e4fd61d3ddf1f2a9d5364` in `takibi-tools/takibi-tools.github.io`. The Japanese edition is not modified.
+This edition was aligned with the Japanese release at commit `e0e0be05e6bf07431a6e4fd61d3ddf1f2a9d5364` in `takibi-tools/takibi-tools.github.io`. Context guidance was subsequently updated in both main apps on 2026-09-19; the standalone demos remain unchanged.
 
 - App: `../yomitoki-en.html`
 - Standalone demo: `../yomitoki-en-demo/index.html`
-- Run the offline tests from the repository root: `node tests/yomitoki-en.test.cjs`
+- Run the offline tests from the repository root: `node tests/yomitoki-en.test.cjs` and `node tests/context.test.cjs`
 
 ## Behavior shared with the Japanese edition
 
@@ -15,6 +15,8 @@ One run makes two API requests: inspection plus revision, then a second inspecti
 The app shows one underline color per passage. If an unsupported assertion overlaps with a more specific issue, that specific issue provides the color. If several specific issues overlap, a valid `primary` (or `primaryFlag`) chooses among them; otherwise their returned order is used. This is not a severity ranking. Every recognized issue remains in the findings, even when its color is not used for the passage.
 
 The sample button saves the current question and reply in memory, shows the translated example, and changes to **Back to my text**. Selecting it again restores both fields. The standalone demo contains no API call or key-storage code.
+
+The original question / context is recommended, not required. Empty or whitespace-only context produces a separate “Inspected without context” note above the results. It reflects the submitted input and is unaffected by later edits. Both inspection prompts share a clarification: missing context alone does not establish that evidence does not exist or that the AI invented a claim. Problems visible in the response are still inspected using the existing criteria.
 
 ## Classification and localization
 
@@ -32,7 +34,7 @@ The Japanese criteria and response keys are retained. English labels are a prese
 | 過剰な未来予測 | Overconfident prediction | mirai |
 | 出どころなき引用 | Unsourced citation | inyou |
 
-Changing a display label must not change these response values or the CSS mapping. Invalid or incomplete results are rejected rather than silently treated as unflagged. The model, request parameters, inspection criteria and correction policy match the Japanese baseline; the output-language instruction is localized.
+Changing a display label must not change these response values or the CSS mapping. Invalid or incomplete results are rejected rather than silently treated as unflagged. The model, request parameters, inspection criteria and correction policy match the current Japanese edition; the output-language instruction is localized.
 
 The paper grid, serif headings, red seal, colors and layout are retained. The English revision heading has extra right padding to avoid colliding with the seal on narrow screens.
 

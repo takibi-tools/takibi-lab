@@ -50,7 +50,7 @@ function permutations(a){return a.length?a.flatMap((v,i)=>permutations(a.filter(
   const checks=[];
   new vm.Script(source);new vm.Script(demoSource);
   const criteriaSource=source.match(/var CRITERIA = \[[\s\S]*?\].join\("\\n"\);/)[0].replace(/\r\n/g,'\n');
-  assert.equal(crypto.createHash('sha256').update(criteriaSource).digest('hex'),'122f05af15c71d5b3e420b0c03fbb30ebf7d03296dcb7f7a9c6b871502fbd12a');
+  assert.equal(crypto.createHash('sha256').update(criteriaSource).digest('hex'),'4dd74e882d5def398ee3d12f72f636cf6685873f6fc8cb591f1971869ed11e5f');
   for(const page of [html,demoHtml]){
     assert.match(page,/<html lang="en">/);
     assert.equal(jp.test(page.replace(/<style>[\s\S]*?<\/style>/,'').replace(/<script>[\s\S]*?<\/script>/,'')),false);

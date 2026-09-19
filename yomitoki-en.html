@@ -78,6 +78,8 @@
 
   .input-block{margin-bottom:18px}
   .input-block label{display:flex;align-items:baseline;gap:8px;font-size:13px;font-weight:700;margin-bottom:8px;letter-spacing:.04em}
+  .input-block label[for="question"]{flex-wrap:wrap}
+  .context-help,.context-note{font-size:12.5px;color:var(--ink-soft);line-height:1.7;margin-bottom:10px}
   .input-block label .opt{font-size:11px;font-weight:400;color:var(--ink-faint)}
   .input-block label .count{margin-left:auto;font-size:11px;font-weight:400;color:var(--ink-faint)}
   .input-block label .count.over{color:var(--shu)}
@@ -220,8 +222,9 @@
   <p class="config-lead">To inspect your own text, open the settings and enter your API key.</p>
 
   <div class="input-block">
-    <label for="question">Original question or context <span class="opt">optional</span></label>
-    <textarea id="question" placeholder="Paste the question you asked the AI, or any relevant conversation context."></textarea>
+    <label for="question">Original question / context <span class="opt">[Recommended]</span></label>
+    <p class="context-help" id="question-help">If you have the original question or relevant conversation, include it here. Otherwise, only the response itself will be inspected.</p>
+    <textarea id="question" aria-describedby="question-help" placeholder="Paste the question you sent to the AI or relevant parts of the conversation. You do not need to include the entire conversation."></textarea>
   </div>
 
   <div class="input-block">
@@ -239,6 +242,7 @@
 
     <hr class="rule">
 
+    <p class="context-note" id="context-note" hidden></p>
     <p class="summary" id="summary"></p>
     <p class="result-note" id="result-note">Inspection results are an AI assessment.</p>
 
@@ -379,6 +383,7 @@
 "・出どころなき引用：「専門家によれば」「研究では」等、出典を示さず権威を借りている",
 "",
 "感情の受け止めそのものと、入力に根拠のある評価はフラグを立てない。",
+"元の質問・会話が提供されていない場合、その不在だけを理由に「根拠が存在しない」「AIが勝手に付け足した」と確定しない。「提供された情報だけでは根拠を確認できない」と、根拠がないことや虚偽が確認された場合を区別する。文脈なしでも本文から判断できる問題は、既存の基準で検品する。",
 "「世間では」「そう言われることも多い」などの世評・頻度は、それ自体が根拠を要する主張。裏付けなく同意や権威づけに使われていれば根拠なき断定、出どころのない他者の評価を借りていれば出どころなき引用も付ける。根拠不明と虚偽確定は区別し、出典を捏造しない。",
 "職業・肩書き・属性で人や人生を序列化する前提へのAI自身の同意は過剰肯定。対象が何であれ基準を変えない。相手が引用した言葉や相手自身の痛みは評価対象にせず、AIが同調している箇所だけを指摘する。具体的な条件に基づく比較や個人の好みの表明とは区別する。",
 "「そういう経験はありますか」のように存在を尋ねるだけの質問は、経験があるとの断定ではない。未確認の成功を前提にする「成功したときはどうしましたか」と区別し、問いを機械的に問題扱いしない。",
@@ -563,7 +568,14 @@ CRITERIA,
     }).join("");
   }
 
-  function render(result, isDemo){
+  function setContextNote(withoutContext){
+    var note = $("context-note");
+    note.textContent = withoutContext ? "Inspected without context: The original question and conversation were not provided." : "";
+    note.hidden = !withoutContext;
+  }
+
+  function render(result, isDemo, hasContext){
+    setContextNote(!isDemo && hasContext === false);
     var markedHtml = "";
     var findingsHtml = "";
     var flaggedCount = 0;
@@ -664,6 +676,7 @@ CRITERIA,
     $("sample").disabled = true;
     startTick(reply.length > 1500 ? "Re-measuring… Longer replies may take about a minute." : "Re-measuring…");
     $("result").classList.remove("show");
+    setContextNote(false);
     $("copied").textContent = "";
 
     return callGemini(key, model, buildPrompt(question, reply), currentCtrl)
@@ -672,7 +685,7 @@ CRITERIA,
         validateSegments(result, reply);
         if(typeof result.remeasured !== "string" || !result.remeasured.trim()){ throw new Error("The result format was not as expected. Please try again."); }
         startTick("Running the second inspection…");
-        render(result, false);
+        render(result, false, question.length > 0);
         return callGemini(key, model, buildRecheckPrompt(question, reply, result), currentCtrl)
           .then(function(check){ if(myRun !== runId) return; validateSegments(check, result.remeasured); renderRecheck(check); })
           .catch(function(err){
@@ -804,6 +817,7 @@ CRITERIA,
       sampleInputBackup = null;
       $("sample").textContent = "View sample";
       $("result").classList.remove("show");
+      setContextNote(false);
       $("status").textContent = "Your original text has been restored.";
       $("status").classList.remove("error");
       updateCount();
