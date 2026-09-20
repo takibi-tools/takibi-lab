@@ -89,6 +89,27 @@
       font-size: 14px;
     }
 
+    .hero-visual {
+      margin: 26px 0 0;
+    }
+
+    .hero-visual img {
+      display: block;
+      width: 100%;
+      height: min(43vw, 420px);
+      object-fit: cover;
+      object-position: center 48%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 14px 34px rgba(39, 36, 29, .08);
+    }
+
+    .hero-visual figcaption {
+      margin: 7px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     main { padding: 42px 0 64px; }
 
     section + section { margin-top: 58px; }
@@ -348,6 +369,10 @@
       }
       .brand img { width: 156px; }
       .section-head { gap: 4px; }
+      .hero-visual img {
+        height: auto;
+        aspect-ratio: 3 / 2;
+      }
       main { padding-top: 32px; }
       section + section { margin-top: 46px; }
     }
@@ -373,6 +398,10 @@
       </div>
       <p class="intro">生成AIの出力を検品する道具と、日本の季節を触って味わう短編Web作品をつくっています。</p>
       <p class="current">現在は「よみとき」の検証・公開と、2026年夏の季節作品シリーズを進行中です。</p>
+      <figure class="hero-visual">
+        <img src="./assets/takibi-lab-exhibition-booth.jpg" width="1536" height="1024" alt="TAKIBI labの展示ブースイメージ。中央にロゴ、左右にWeb作品を表示した端末とランタン">
+        <figcaption>TAKIBI lab 展示ブースイメージ</figcaption>
+      </figure>
     </div>
   </header>
 
@@ -395,6 +424,7 @@
         <div class="button-row">
           <a class="button primary-link" href="https://takibi-tools.github.io/yomitoki/" target="_blank" rel="noopener">日本語版を開く →</a>
           <a class="button" href="./yomitoki-en.html">English version →</a>
+          <a class="button" href="https://note.com/joyful_seal7155/n/ndeef9d52bc6b" target="_blank" rel="noopener">「よみとき」の開発背景をnoteで読む ↗</a>
         </div>
       </article>
     </section>
