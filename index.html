@@ -102,6 +102,45 @@
     }
     @media (max-width:360px) { .gallery { grid-template-columns:1fr; } }
     @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { transition:none !important; } }
+
+    .side-nav .nav-featured { color:var(--accent); font-weight:650; }
+    .featured-panel { display:grid; grid-template-columns:1.1fr 1fr; grid-template-areas:"heading art" "details art"; background:#f5f1e8; border:1px solid #e8e1d4; }
+    .feature-copy { display:contents; }
+    .feature-heading { grid-area:heading; min-width:0; padding:32px 32px 0; }
+    .feature-details { grid-area:details; min-width:0; padding:0 32px 32px; }
+    .feature-copy .eyebrow { margin-bottom:14px; }
+    .feature-copy h2 { margin:0; font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-size:clamp(40px,4.2vw,56px); font-weight:500; line-height:1.3; letter-spacing:.1em; }
+    .feature-copy .tagline { margin-top:12px; font-size:17px; }
+    .feature-copy .description { font-size:13px; }
+    .feature-copy .button.primary-link { background:var(--accent); border-color:var(--accent); }
+    .feature-copy .button-row { gap:10px; }
+    .feature-copy .button { font-size:12px; }
+    .feature-copy .button:last-child { flex-basis:100%; background:rgba(255,255,255,.4); }
+    .feature-art { grid-area:art; display:flex; align-items:center; min-width:0; overflow:hidden; }
+    .feature-art img { display:block; width:100%; height:auto; }
+    .gallery { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .gallery-caption { align-items:flex-start; flex-direction:column; gap:3px; }
+    @media (max-width:1050px) {
+      .featured-panel { grid-template-columns:1fr; grid-template-areas:"heading" "art" "details"; }
+      .feature-art { max-height:330px; justify-content:center; }
+      .feature-art img { width:min(100%,600px); }
+      .feature-copy .button:last-child { flex-basis:auto; }
+    }
+    @media (max-width:600px) {
+      .feature-heading { padding:25px 20px 18px; }
+      .feature-details { padding:0 20px 25px; }
+      .feature-copy h2 { font-size:44px; }
+      .feature-copy .tagline { font-size:16px; }
+      .feature-copy .button:last-child { flex-basis:100%; }
+      .feature-art { max-height:none; }
+      .gallery { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width:360px) {
+      .gallery { grid-template-columns:1fr; }
+      .feature-heading { padding:22px 16px 18px; }
+      .feature-details { padding:0 16px 22px; }
+      .feature-copy h2 { font-size:38px; }
+    }
   </style>
 </head>
 <!--
@@ -123,30 +162,51 @@
   </header>
   <div class="wrap layout">
     <nav class="side-nav" aria-label="メインナビゲーション">
-      <a href="#works">作品</a>
+      <a class="nav-featured" href="#yomitoki">よみとき</a>
+      <a href="#works">季節作品</a>
       <a href="#concept">コンセプト</a>
       <a href="#process">つくる人</a>
-      <a href="#yomitoki">よみとき</a>
       <p class="side-note">生成AIで、日常に<br>小さなワクワクを。</p>
     </nav>
     <main id="main">
+      <section class="featured" id="yomitoki" aria-labelledby="yomitoki-title">
+        <article class="featured-panel">
+          <div class="feature-copy">
+            <div class="feature-heading">
+        <p class="eyebrow">AI OUTPUT INSPECTION TOOL</p>
+        <h2 id="yomitoki-title">よみとき</h2>
+        <p class="tagline">AIの返答を、測り直す。</p>
+            </div>
+            <div class="feature-details">
+        <p class="description">AIの返答を8つの軸で分解し、事実・推論・意見を見分けながら、根拠のない断定や過剰な肯定を検品。本来あるべき温度の文へ組み直すWebツールです。</p>
+        <ul class="axes" aria-label="検品する8つの軸">
+          <li>事実</li><li>推論</li><li>意見</li><li>励まし</li>
+          <li>根拠なき断定</li><li>過剰肯定</li><li>過剰な未来予測</li><li>出どころなき引用</li>
+        </ul>
+        <div class="button-row">
+          <a class="button primary-link" href="https://takibi-tools.github.io/yomitoki/" target="_blank" rel="noopener">日本語版を開く →</a>
+          <a class="button" href="./yomitoki-en.html">English version →</a>
+          <a class="button" href="https://note.com/joyful_seal7155/n/ndeef9d52bc6b" target="_blank" rel="noopener">「よみとき」の開発背景をnoteで読む ↗</a>
+        </div>
+            </div>
+          </div>
+          <div class="feature-art">
+            <img src="./assets/yomitoki-illustration.png" width="1536" height="1024" alt="色で分かれた文章を虫眼鏡で読み解き、絡まった糸をほどくイメージイラスト" fetchpriority="high">
+          </div>
+        </article>
+      </section>
       <section id="works" aria-labelledby="works-title">
-        <div class="section-head"><h2 id="works-title">作品</h2><p>触れて、試して、感じる。</p></div>
+        <div class="section-head"><h2 id="works-title">季節作品</h2><p>触れて、試して、感じる。</p></div>
         <div class="gallery">
           <a class="gallery-card" href="https://takibi-kakigori.netlify.app/" target="_blank" rel="noopener">
-            <div class="gallery-image"><img src="./assets/work-kakigori.jpg" width="1000" height="750" alt="風鈴と朝顔、淡い空色のかき氷のタイトル画面" fetchpriority="high"></div>
+            <div class="gallery-image"><img src="./assets/work-kakigori.jpg" width="1000" height="750" alt="風鈴と朝顔、淡い空色のかき氷のタイトル画面" loading="lazy"></div>
             <div class="gallery-caption"><h3>かき氷 ↗</h3><span>季節作品 / 無料公開</span></div>
             <p>氷を削り、五つのシロップを重ねる。</p>
           </a>
           <a class="gallery-card" href="https://takibi-senko-hanabi.netlify.app/" target="_blank" rel="noopener">
-            <div class="gallery-image"><img src="./assets/work-hanabi.jpg" width="1000" height="750" alt="暗闇に金色の火花が開く、線香花火の体験画面"></div>
+            <div class="gallery-image"><img src="./assets/work-hanabi.jpg" width="1000" height="750" alt="暗闇に金色の火花が開く、線香花火の体験画面" loading="lazy"></div>
             <div class="gallery-caption"><h3>線香花火 ↗</h3><span>季節作品 / 無料公開</span></div>
             <p>火花の変化と、消えるまでの時間を。</p>
-          </a>
-          <a class="gallery-card" href="#yomitoki">
-            <div class="gallery-image"><img src="./assets/work-yomitoki.jpg" width="1000" height="750" alt="方眼紙の背景に入力欄が並ぶ、よみときの画面" loading="lazy"></div>
-            <div class="gallery-caption"><h3>よみとき →</h3><span>AI出力検品ツール</span></div>
-            <p>AIの返答を、測り直す。</p>
           </a>
           <a class="gallery-card" href="https://takibilab.itch.io/" target="_blank" rel="noopener">
             <div class="gallery-image"><img src="./assets/work-summer.png" width="630" height="500" alt="風鈴、七夕、灯籠を描いたA Japanese Summerのカバー" loading="lazy"></div>
@@ -161,28 +221,7 @@
         <p class="intro">生成AIの出力を検品する道具と、日本の季節を触って味わう短編Web作品をつくっています。</p>
         <p class="current">現在は「よみとき」の検証・公開と、2026年夏の季節作品シリーズを進行中です。</p>
       </section>
-    <section id="yomitoki" aria-labelledby="yomitoki-title">
-      <div class="section-head">
-        <h2 id="yomitoki-title">よみときについて</h2>
-        <p>現在の中心活動</p>
-      </div>
 
-      <article class="primary">
-        <p class="eyebrow">AI OUTPUT INSPECTION TOOL</p>
-        <h3>よみとき</h3>
-        <p class="tagline">AIの返答を、測り直す。</p>
-        <p class="description">AIの返答を8つの軸で分解し、事実・推論・意見を見分けながら、根拠のない断定や過剰な肯定を検品。本来あるべき温度の文へ組み直すWebツールです。</p>
-        <ul class="axes" aria-label="検品する8つの軸">
-          <li>事実</li><li>推論</li><li>意見</li><li>励まし</li>
-          <li>根拠なき断定</li><li>過剰肯定</li><li>過剰な未来予測</li><li>出どころなき引用</li>
-        </ul>
-        <div class="button-row">
-          <a class="button primary-link" href="https://takibi-tools.github.io/yomitoki/" target="_blank" rel="noopener">日本語版を開く →</a>
-          <a class="button" href="./yomitoki-en.html">English version →</a>
-          <a class="button" href="https://note.com/joyful_seal7155/n/ndeef9d52bc6b" target="_blank" rel="noopener">「よみとき」の開発背景をnoteで読む ↗</a>
-        </div>
-      </article>
-    </section>
 
     <section aria-labelledby="season-title">
       <div class="section-head">
