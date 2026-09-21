@@ -30,15 +30,26 @@
     #works .gallery-image-dark { background:#080808; }
     #works .gallery-image img { object-fit:contain; }
     #works .gallery-card:hover img { transform:none; }
-    .parfait-card { grid-column:1 / -1; border:1px solid #e0d1c8; background:#f8f3ec; }
-    .parfait-art { background:#f8f3ec; }
-    .parfait-art img { display:block; width:100%; height:auto; }
-    .parfait-copy { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:28px; min-width:0; padding:26px 30px; }
+    .parfait-card { grid-column:1 / -1; display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); grid-template-areas:"illustration art" "illustration copy"; border:1px solid #e0d1c8; background:#f8f3ec; }
+    .parfait-illustration { grid-area:illustration; display:flex; align-items:center; justify-content:center; min-width:0; padding:16px; background:#eee5da; }
+    .parfait-illustration img { display:block; width:100%; height:auto; }
+    .parfait-art { grid-area:art; align-self:end; min-width:0; padding:24px 26px 0; background:#f8f3ec; }
+    .parfait-title { margin:0 0 18px; color:#563343; font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-size:30px; font-weight:500; line-height:1.4; }
+    .parfait-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .parfait-gallery figure { min-width:0; margin:0; }
+    .parfait-shot { position:relative; overflow:hidden; border-radius:6px; background:#eee5da; }
+    .parfait-shot img { position:absolute; display:block; max-width:none; height:auto; }
+    /* Show each original screenshot's café canvas, preserving its pixels and proportions. */
+    .parfait-shot-day { aspect-ratio:532/645; }
+    .parfait-shot-day img { width:140.414%; left:-19.549%; top:-9.613%; }
+    .parfait-shot-night { aspect-ratio:557/677; }
+    .parfait-shot-night img { width:151.706%; left:-25.314%; top:-9.158%; }
+    .parfait-gallery figcaption { margin-top:10px; color:#563343; text-align:center; font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-size:14px; line-height:1.6; }
+    .parfait-copy { grid-area:copy; display:grid; grid-template-columns:1fr; align-content:start; min-width:0; padding:24px 26px; }
     .parfait-copy .gallery-caption, .parfait-copy p { grid-column:1; }
     .parfait-copy .gallery-caption { margin:0; gap:8px; }
-    .parfait-copy .gallery-caption h3 { font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-size:28px; font-weight:500; line-height:1.4; }
     .parfait-card .parfait-copy p { margin-top:10px; font-size:13px; line-height:1.9; }
-    .parfait-link { grid-column:2; grid-row:1 / 4; align-self:center; display:inline-flex; align-items:center; min-height:44px; padding:9px 14px; border:1px solid #bb8f80; color:var(--accent); font-size:12px; }
+    .parfait-link { grid-column:1; justify-self:start; display:inline-flex; align-items:center; min-height:44px; margin-top:18px; padding:9px 14px; border:1px solid #bb8f80; color:var(--accent); font-size:12px; }
     .parfait-card:hover .parfait-link { border-color:var(--accent); }
     .gallery-caption { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:12px; }
     .gallery-caption h3 { margin:0; font-size:16px; font-weight:550; }
@@ -69,6 +80,11 @@
       .gallery { gap:24px 16px; }
       .gallery-caption { flex-wrap:wrap; gap:2px 10px; }
     }
+    @media (max-width:1050px) {
+      .parfait-card { grid-template-columns:1fr; grid-template-areas:"illustration" "art" "copy"; }
+      .parfait-illustration { padding:22px; }
+      .parfait-illustration img { max-width:340px; }
+    }
     @media (max-width:600px) {
       .site-header { padding:12px 0 20px; }
       .brand-row { gap:16px; }
@@ -84,7 +100,10 @@
       .gallery-caption span { font-size:9px; }
       .gallery-card p { font-size:11px; }
       .parfait-copy { padding:22px 18px; }
-      .parfait-copy .gallery-caption h3 { font-size:26px; }
+      .parfait-art { padding:22px 18px 0; }
+      .parfait-title { font-size:26px; }
+      .parfait-gallery { gap:10px; }
+      .parfait-gallery figcaption { font-size:12px; }
       .section-head { gap:10px; flex-wrap:wrap; margin-bottom:18px; }
       .section-head h2 { font-size:16px; }
       section + section { margin-top:48px; }

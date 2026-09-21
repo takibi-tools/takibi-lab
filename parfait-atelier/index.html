@@ -105,14 +105,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   details.setAttribute('aria-label','作品の名前と完成');
   details.className='creation-details';
   const movable=[...stage.children].filter(el=>!el.matches('.stage-heading,.canvas-wrap,.drag-mode'));
-  const anchors=movable.map(el=>{const anchor=document.createComment('original position');el.before(anchor);return anchor;});
-  bench.after(details);
+  movable.forEach(el=>details.append(el));
   const layout=()=>{
     switcher.hidden=true;
     document.body.classList.remove('mobile-canvas','mobile-tools');
-    if(mobile.matches)movable.forEach(el=>details.append(el));
-    else movable.forEach((el,i)=>anchors[i].after(el));
-    details.hidden=!mobile.matches;
+    if(mobile.matches){
+      bench.after(details);
+      details.removeAttribute('tabindex');
+    }else{
+      stage.append(details);
+      details.tabIndex=0;
+    }
   };
   mobile.addEventListener('change',layout);
   layout();
@@ -227,6 +230,19 @@ h1,.workbench-title h1,.dialog-heading h2,.gift-reveal h3,.album-cover strong,.e
 .beta-notice{border:1px solid #d7c3ce;border-radius:10px;padding:12px 14px;background:#f5edf1;margin-bottom:14px}.beta-notice p{font-size:13px;line-height:1.8;margin:5px 0}.beta-notice strong{font-weight:600}
 #panel .locked-item small{display:block!important;font-size:11px;line-height:1.5;overflow-wrap:anywhere;white-space:normal;color:#654653}.locked-item{cursor:pointer}
 @media(max-width:650px){.beta-version{font-size:10px;padding:2px 4px}.beta-notice{padding:10px 12px}.beta-notice p{font-size:12px}}
+</style>
+<style id="pinned-workspace">
+/* Clip horizontal overflow without creating an ancestor scroll container. */
+html,body{overflow-x:clip!important;overflow-y:visible!important}
+@media(min-width:651px){
+  main>.stage-panel{position:sticky;top:12px;align-self:start;display:flex;flex-direction:column;height:calc(100vh - 24px);height:calc(100dvh - 24px);min-height:0;max-height:calc(100dvh - 24px);padding:14px 12px;overflow:hidden}
+  main>.stage-panel>.stage-heading{flex:0 0 auto;margin:0 4px 8px}
+  main>.stage-panel>.canvas-wrap{flex:0 0 auto;width:min(100%,calc(min(62vh,100vh - 190px)*700/850));width:min(100%,calc(min(62dvh,100dvh - 190px)*700/850));max-width:100%;max-height:none;margin:0 auto}
+  main>.stage-panel>.canvas-wrap canvas{width:100%;height:auto;max-height:none}
+  main>.stage-panel>.drag-mode{flex:0 0 auto;margin:6px auto}
+  main>.stage-panel>.creation-details{flex:1 1 auto;min-height:0;min-width:0;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-gutter:stable;scroll-padding-block:8px;padding:4px 6px 8px;margin-top:8px}
+  main>.stage-panel>.creation-details .creation-caption{margin-top:8px}
+}
 </style></head><body>
 <header><a class="brand" href="#canvas">Parfait <i>Atelier</i> <b class="beta-version">β 0.3</b><span>パフェ アトリエ</span></a><span class="header-note">β 0.3 · 自由に仕立てる。</span><button id="open-collection" class="quiet">ショーケース <span id="collection-count">0</span></button><button id="open-mypage" class="secondary">マイページ</button></header>
 <main>
@@ -659,24 +675,10 @@ function resetProfile(){const before=profile,previous=state;profile=Atelier.init
 })();
 </script>
 <script id="mobile-fix-js">
-// スマホ幅では「名前」と「完成・保存」をスクロールの一番下へ移し、上の固定部分をパフェと最小の道具だけにする（燈）
+// The responsive layout above moves controls together; keep anchor spacing in sync.
 (function(){
- const mq=matchMedia('(max-width:650px)');
- const stage=document.querySelector('.stage-panel'),work=document.querySelector('.workbench');
- const cap=document.querySelector('.stage-panel .creation-caption'),save=document.querySelector('.stage-panel .save-actions');
- if(!stage||!work||!cap||!save)return;
- const anchorCap=document.createComment('cap'),anchorSave=document.createComment('save');
- cap.before(anchorCap);save.before(anchorSave);
- let box=null;
- function apply(){
-  if(mq.matches){
-   if(!box){box=document.createElement('div');box.className='mobile-finish';work.after(box);}
-   box.append(cap,save);
-  }else if(box){
-   anchorCap.after(cap);anchorSave.after(save);box.remove();box=null;
-  }
- }
- apply();mq.addEventListener('change',apply);
+ const stage=document.querySelector('.stage-panel');
+ if(!stage)return;
  const setH=()=>document.documentElement.style.setProperty('--stage-h',stage.offsetHeight+'px');
  setH();if(window.ResizeObserver)new ResizeObserver(setH).observe(stage);addEventListener('resize',setH);
 })();
