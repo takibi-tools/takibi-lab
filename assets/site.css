@@ -30,6 +30,17 @@
     #works .gallery-image-dark { background:#080808; }
     #works .gallery-image img { object-fit:contain; }
     #works .gallery-card:hover img { transform:none; }
+    .parfait-card { grid-column:1 / -1; display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); align-items:center; border:1px solid #e0d1c8; background:#f1e7e2; }
+    .parfait-art { display:flex; align-self:stretch; align-items:center; justify-content:center; padding:18px; background:#e9ddce; }
+    .parfait-art img { display:block; width:100%; height:auto; max-height:500px; object-fit:contain; }
+    .parfait-previews { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:12px; max-width:350px; margin-top:18px; }
+    .parfait-previews img { display:block; width:100%; height:auto; }
+    .parfait-copy { min-width:0; padding:28px; }
+    .parfait-copy .gallery-caption { margin:0; gap:8px; }
+    .parfait-copy .gallery-caption h3 { font-family:"Yu Mincho","Hiragino Mincho ProN",serif; font-size:28px; font-weight:500; line-height:1.4; }
+    .parfait-card .parfait-copy p { margin-top:14px; font-size:13px; line-height:1.9; }
+    .parfait-link { display:inline-flex; align-items:center; min-height:44px; margin-top:20px; padding:9px 14px; border:1px solid #bb8f80; color:var(--accent); font-size:12px; }
+    .parfait-card:hover .parfait-link { border-color:var(--accent); }
     .gallery-caption { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:12px; }
     .gallery-caption h3 { margin:0; font-size:16px; font-weight:550; }
     .gallery-caption span { color:var(--muted); font-size:10px; white-space:nowrap; }
@@ -54,6 +65,8 @@
     @media (max-width:800px) {
       .wrap { width:calc(100% - 40px); }
       .layout { grid-template-columns:112px minmax(0,1fr); gap:24px; }
+      .parfait-card { grid-template-columns:1fr; }
+      .parfait-copy { padding:24px; }
       .gallery { gap:24px 16px; }
       .gallery-caption { flex-wrap:wrap; gap:2px 10px; }
     }
@@ -71,6 +84,11 @@
       .gallery-caption h3 { font-size:14px; }
       .gallery-caption span { font-size:9px; }
       .gallery-card p { font-size:11px; }
+      .parfait-art { padding:12px; }
+      .parfait-art img { max-height:380px; }
+      .parfait-previews { gap:8px; }
+      .parfait-copy { padding:22px 18px; }
+      .parfait-copy .gallery-caption h3 { font-size:26px; }
       .section-head { gap:10px; flex-wrap:wrap; margin-bottom:18px; }
       .section-head h2 { font-size:16px; }
       section + section { margin-top:48px; }
