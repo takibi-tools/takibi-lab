@@ -14,11 +14,12 @@
     a { color:inherit; text-underline-offset:4px; }
     a:focus-visible { outline:2px solid var(--accent); outline-offset:5px; }
     .wrap { width:min(calc(100% - 72px),1120px); margin-inline:auto; }
-    .site-header { padding:40px 0 29px; border-bottom:1px solid var(--line); }
+    .site-header { padding:16px 0 24px; border-bottom:1px solid var(--line); }
     .brand-row { display:flex; align-items:center; justify-content:space-between; gap:24px; }
     .brand { margin:0; font-size:25px; font-weight:500; letter-spacing:.12em; line-height:1.4; }
-    .brand a { text-decoration:none; }
-    .brand-tagline { margin:7px 0 0; color:var(--muted); font-size:12px; letter-spacing:.16em; }
+    .brand a { display:block; width:144px; text-decoration:none; }
+    .brand img { display:block; width:144px; height:auto; }
+    .brand-tagline { width:144px; text-align:center; margin:3px 0 0; color:var(--muted); font-size:12px; letter-spacing:.16em; }
     .label { margin:0; font-size:10px; letter-spacing:.16em; color:var(--muted); }
     .layout { display:grid; grid-template-columns:150px minmax(0,1fr); gap:44px; padding-top:38px; padding-bottom:80px; }
     .side-nav { align-self:start; position:sticky; top:32px; padding-top:6px; }
@@ -40,13 +41,7 @@
     .gallery-caption span { color:var(--muted); font-size:10px; white-space:nowrap; }
     .gallery-card p { margin:3px 0 0; font-size:12px; color:var(--muted); }
     .gallery-note { margin:24px 0 0; font-size:11px; color:var(--muted); }
-    .about { border-top:1px solid var(--line); padding-top:32px; }
-    .about h2 { margin:0 0 16px; font-size:22px; font-weight:500; letter-spacing:.08em; }
-    .intro { max-width:650px; margin:0; font-size:15px; line-height:2; }
-    .current { margin:12px 0 0; color:var(--muted); font-size:12px; }
-    .primary { padding:30px; background:#f4f2ec; border:1px solid #eeebe3; }
     .eyebrow { margin:0 0 10px; color:var(--accent); font-size:10px; font-weight:600; letter-spacing:.16em; }
-    .primary h3 { margin:0; font-size:32px; font-weight:500; line-height:1.35; letter-spacing:.05em; overflow-wrap:anywhere; }
     .tagline { margin:8px 0 0; font-size:15px; }
     .description { margin:18px 0 0; font-size:13px; line-height:2; }
     .axes { display:flex; flex-wrap:wrap; gap:6px; margin:18px 0 0; padding:0; list-style:none; }
@@ -55,14 +50,6 @@
     .button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; max-width:100%; padding:10px 14px; border:1px solid #c9cdc3; text-align:center; text-decoration:none; font-size:12px; line-height:1.7; }
     .button.primary-link { background:var(--ink); border-color:var(--ink); color:white; }
     .button:hover { border-color:var(--accent); }
-    .works { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
-    .work { display:flex; flex-direction:column; justify-content:space-between; padding:20px 0; border-top:1px solid var(--line); text-decoration:none; }
-    .work-top { display:flex; align-items:baseline; flex-wrap:wrap; gap:10px; justify-content:space-between; }
-    .work h3 { margin:0; font-size:17px; font-weight:500; }
-    .work p { font-size:12px; color:var(--muted); margin:8px 0 0; }
-    .work .credit { font-size:10px; }
-    .status { font-size:10px; color:var(--green); }
-    .open { margin-top:18px; font-size:12px; }
     .process { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
     .process-card { border-top:1px solid var(--line); padding-top:20px; }
     .process-card h3 { margin:0; font-size:13px; font-weight:600; }
@@ -76,12 +63,13 @@
       .layout { grid-template-columns:112px minmax(0,1fr); gap:24px; }
       .gallery { gap:24px 16px; }
       .gallery-caption { flex-wrap:wrap; gap:2px 10px; }
-      .primary { padding:24px; }
     }
     @media (max-width:600px) {
-      .site-header { padding:26px 0 20px; }
+      .site-header { padding:12px 0 20px; }
       .brand-row { align-items:flex-start; }
       .brand { font-size:22px; }
+      .brand a, .brand img, .brand-tagline { width:120px; }
+      .brand-tagline { font-size:11px; letter-spacing:.1em; white-space:nowrap; }
       .label { max-width:110px; font-size:8px; line-height:1.8; text-align:right; }
       .layout { display:block; padding-top:0; padding-bottom:48px; }
       .side-nav { position:static; display:flex; flex-wrap:wrap; gap:4px 24px; padding:14px 0 24px; }
@@ -94,10 +82,7 @@
       .section-head { gap:10px; flex-wrap:wrap; margin-bottom:18px; }
       .section-head h2 { font-size:16px; }
       section + section { margin-top:48px; }
-      .about h2 { font-size:20px; }
-      .works, .process { grid-template-columns:1fr; gap:16px; }
-      .primary { padding:22px 18px; }
-      .primary h3 { font-size:28px; }
+      .process { grid-template-columns:1fr; gap:16px; }
       footer .wrap { flex-wrap:wrap; }
     }
     @media (max-width:360px) { .gallery { grid-template-columns:1fr; } }
@@ -122,7 +107,7 @@
     .gallery-caption { align-items:flex-start; flex-direction:column; gap:3px; }
     @media (max-width:1050px) {
       .featured-panel { grid-template-columns:1fr; grid-template-areas:"heading" "art" "details"; }
-      .feature-art { max-height:330px; justify-content:center; }
+      .feature-art { justify-content:center; }
       .feature-art img { width:min(100%,600px); }
       .feature-copy .button:last-child { flex-basis:auto; }
     }
@@ -154,7 +139,7 @@
   <header class="site-header" id="top">
     <div class="wrap brand-row">
       <div>
-        <h1 class="brand"><a href="#top">TAKIBI lab</a></h1>
+        <h1 class="brand"><a href="#top"><img src="./assets/takibi-logo-lockup.svg" width="144" height="144" alt="TAKIBI lab"></a></h1>
         <p class="brand-tagline">つくるで、ひらく。</p>
       </div>
       <p class="label">HUMAN × AI CREATIVE STUDIO</p>
@@ -164,7 +149,6 @@
     <nav class="side-nav" aria-label="メインナビゲーション">
       <a class="nav-featured" href="#yomitoki">よみとき</a>
       <a href="#works">季節作品</a>
-      <a href="#concept">コンセプト</a>
       <a href="#process">つくる人</a>
       <p class="side-note">生成AIで、日常に<br>小さなワクワクを。</p>
     </nav>
@@ -191,7 +175,7 @@
             </div>
           </div>
           <div class="feature-art">
-            <img src="./assets/yomitoki-illustration.png" width="1536" height="1024" alt="色で分かれた文章を虫眼鏡で読み解き、絡まった糸をほどくイメージイラスト" fetchpriority="high">
+            <img src="./assets/yomitoki-illustration-v2.png" width="1448" height="1086" alt="人とAIが文章を読み解き、事実・推論・意見など8つの軸で検品するイメージイラスト" fetchpriority="high">
           </div>
         </article>
       </section>
@@ -216,49 +200,6 @@
         </div>
         <p class="gallery-note">季節作品の常設無料公開は「かき氷」と「線香花火」の2作品です。</p>
       </section>
-      <section class="about" id="concept" aria-labelledby="concept-title">
-        <div class="section-head"><h2 id="concept-title">つくるで、ひらく。</h2><p>CONCEPT</p></div>
-        <p class="intro">生成AIの出力を検品する道具と、日本の季節を触って味わう短編Web作品をつくっています。</p>
-        <p class="current">現在は「よみとき」の検証・公開と、2026年夏の季節作品シリーズを進行中です。</p>
-      </section>
-
-
-    <section aria-labelledby="season-title">
-      <div class="section-head">
-        <h2 id="season-title">季節作品について</h2>
-        <p>常設無料公開 2作品</p>
-      </div>
-
-      <div class="works">
-        <a class="work" href="https://takibi-kakigori.netlify.app/" target="_blank" rel="noopener">
-          <div>
-            <div class="work-top"><h3>かき氷</h3><span class="status">無料公開</span></div>
-            <p>氷を削り、五つのシロップを自由に重ねる。</p>
-            <p class="credit">制作協働｜Fable 5・GPT-5.6・Gemini 3.5 Flash</p>
-          </div>
-          <span class="open">作品を開く ↗</span>
-        </a>
-
-        <a class="work" href="https://takibi-senko-hanabi.netlify.app/" target="_blank" rel="noopener">
-          <div>
-            <div class="work-top"><h3>線香花火</h3><span class="status">無料公開</span></div>
-            <p>火花の変化と、消えるまでの時間を見つめる。</p>
-            <p class="credit">制作協働｜Claude Opus 4.8・GPT-5.5</p>
-          </div>
-          <span class="open">作品を開く ↗</span>
-        </a>
-      </div>
-
-      <article class="primary" style="margin-top: 18px;">
-        <p class="eyebrow">COMPLETE ANTHOLOGY</p>
-        <h3>A Japanese Summer</h3>
-        <p class="tagline">ひとつづきの日本の夏を、完全版で。</p>
-        <p class="description">常設無料公開は「かき氷」と「線香花火」の2作品です。その他の季節作品は、期間限定公開またはitch.ioの完全版でお楽しみいただけます。</p>
-        <div class="button-row">
-          <a class="button primary-link" href="https://takibilab.itch.io/" target="_blank" rel="noopener">itch.ioで完全版を見る →</a>
-        </div>
-      </article>
-    </section>
 
     <section id="process" aria-labelledby="process-title">
       <div class="section-head">
