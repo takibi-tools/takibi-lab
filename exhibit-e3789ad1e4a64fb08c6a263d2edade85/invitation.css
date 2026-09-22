@@ -1,0 +1,13 @@
+:root { color-scheme:dark; color:#fff8e7; background:#18304a; font-family:Georgia,"Yu Mincho",serif; }
+* { box-sizing:border-box; }
+html,body { margin:0; width:100%; height:100%; }
+body { display:grid; place-items:center; }
+main { width:min(100% - 40px,520px); padding:36px 20px; text-align:center; }
+.eyebrow { font:11px/1.8 sans-serif; letter-spacing:.2em; opacity:.7; }
+h1 { margin:20px 0 8px; font-size:clamp(40px,8vw,64px); font-weight:400; letter-spacing:.08em; }
+.subtitle { margin:0 0 32px; font-size:17px; }
+#status { font-family:system-ui,sans-serif; font-size:14px; line-height:1.9; }
+button { margin-top:16px; padding:12px 22px; color:inherit; background:transparent; border:1px solid #c7c7ba; border-radius:30px; font:inherit; cursor:pointer; }
+button:focus-visible { outline:2px solid white; outline-offset:4px; }
+iframe { display:block; position:fixed; inset:0; width:100%; height:100%; border:0; background:#18304a; }
+[hidden] { display:none !important; }
