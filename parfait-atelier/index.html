@@ -114,8 +114,8 @@ canvas{-webkit-user-select:none;user-select:none}
 .gel-bubble::after{content:'';position:absolute;left:15%;top:10%;width:35%;height:24%;background:#fff;border-radius:50%;transform:rotate(-30deg)}
 .layer-group-heading{margin:18px 0 12px}
 .tabs button[data-tab="inside"]{position:relative}
-.tabs button[data-tab="inside"]::after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:#a7536e;top:6px;right:22%}
-.tabs button[data-tab="inside"].active::after{background:#513344}
+
+
 .inside-intro{position:relative;border:1px solid #e1cbd4;background:linear-gradient(130deg,#f6e8ea,#fff9f1);padding:17px 18px;border-radius:10px;margin:0 0 16px;overflow:hidden}
 .inside-eyebrow{font:11px var(--sans);letter-spacing:2.2px;color:#956879}
 .inside-intro h2{font:500 22px var(--serif);line-height:1.5;letter-spacing:1px;margin:5px 0 8px;color:var(--plum)}
@@ -191,6 +191,26 @@ canvas{-webkit-user-select:none;user-select:none}
  .layer-row button{min-width:40px}
 }
 
+</style><style id="atelier-v832">
+.place-chip{display:flex;align-items:center;gap:9px;margin:0 0 10px;padding:7px 10px;border-radius:9px;background:#fbf3f6;border:1px solid #ecdbe3;color:#6e3e5b;font-size:13px}
+.place-chip svg{width:22px;height:24px;flex:none;color:#8a6a7a}
+.place-chip b{font-size:15px;color:#9a3f66;margin:0 1px}
+.place-chip span{flex:1}
+.place-switch{background:none;border:0;padding:4px 2px;color:#8a6a7a;font-size:11.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:auto}
+.place-switch.active{background:none}
+#layer-list .layer-row{cursor:pointer}
+#layer-list .layer-row:not(.layer-row-active) .layer-thickness{display:none!important}
+#coach{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:9px 10px 9px 12px;border-radius:10px;background:#fff;border:1.5px solid #d9a8bd;box-shadow:0 3px 10px rgba(122,62,89,.08)}
+#coach[hidden]{display:none}
+#coach p{flex:1;margin:0;font-size:13px;line-height:1.6;color:#5d4651}
+.coach-step{flex:none;font:500 12px var(--serif);color:#fff;background:#9a5d78;border-radius:999px;padding:2px 8px}
+.coach-go{flex:none;background:#7a3e59;color:#fff;border:0;border-radius:999px;padding:6px 14px;font-size:12.5px;cursor:pointer}
+.coach-go.active{background:#7a3e59;color:#fff}
+.coach-close{flex:none;background:none;border:0;color:#a08894;font-size:17px;cursor:pointer;padding:2px 4px;min-height:auto}
+.tabs .coach-target{position:relative}
+.tabs .coach-target::after{content:"";position:absolute;top:5px;right:6px;width:8px;height:8px;border-radius:50%;background:#d9577f;animation:coachPulse 1.4s ease-in-out infinite}
+@keyframes coachPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.45}}
+@media (prefers-reduced-motion:reduce){.tabs .coach-target::after{animation:none}}
 </style><style id="mobile-atelier-2026">
 .layer-row{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:6px 9px;align-items:center;padding:9px 4px;border-bottom:1px solid #e3d7dc}
 .layer-row .name{grid-column:2;min-width:0;font-weight:600;overflow-wrap:anywhere}
@@ -424,7 +444,7 @@ body:not([data-current-tab="home"]) .edit-toolbar{display:none!important}
 <section class="workbench" aria-label="制作道具"><div class="workbench-title"><div><span class="eyebrow">MAKE IT YOURS</span><h1>パフェを仕立てる</h1></div><span class="edition">ATELIER / 09</span></div>
 <section class="journey" aria-label="お題と報酬"><div class="journey-heading"><h2 id="mode-title">自由制作</h2><button id="open-rewards" class="quiet">アイテムボックス <span id="gift-count"></span></button></div><nav class="creation-modes" aria-label="制作モード"><button data-mode="daily">今日のひとしな</button><button data-mode="free">自由制作</button></nav><div id="daily-panel"><p id="board-label"></p><div id="quest-tabs" aria-label="3つのお題"></div><div id="current-quest" class="current-quest" hidden></div><details id="quest-details"><summary>お題の一覧・入れ替え</summary><div id="quest-cards"></div></details><button id="next-board" class="secondary">次の3題へ</button></div><p id="content-progress" class="content-progress"></p><p id="quest-status" aria-live="polite"></p><div class="progress-line"><span id="quest-progress">お題 0 / 3</span><span id="progress-caption">新しい器まで</span></div><progress id="progress" value="0" max="3" aria-label="次の箱までのお題達成数"></progress><p class="hint">報酬はお題モードのみ。お題を3回完成すると、箱から未所持品を1個もらえます。</p></section>
 <nav class="tabs" aria-label="制作道具の種類"><button class="active" data-tab="home" aria-pressed="true">ホーム</button><button data-tab="glass" aria-pressed="false">器</button><button data-tab="layers" aria-pressed="false">層</button><button data-tab="inside" aria-pressed="false">中身</button><button data-tab="toppings" aria-pressed="false">飾り</button><button data-tab="photo" aria-pressed="false">背景</button></nav>
-<p id="inside-live" class="sr-only" role="status" aria-live="polite"></p><div id="home-storage" hidden></div><div id="panel"></div><div id="selection"></div><section class="recipe"><div class="recipe-title"><h2>重ねた層・高さ</h2><span>上から順に</span></div><div id="layer-list"></div><p class="hint">各段の高さを個別調整。矢印で順番を変えられます。</p></section>
+<p id="inside-live" class="sr-only" role="status" aria-live="polite"></p><div id="home-storage" hidden></div><div id="coach" hidden></div><div id="panel"></div><div id="selection"></div><section class="recipe"><div class="recipe-title"><h2>重ねた層・高さ</h2><span>上から順に</span></div><div id="layer-list"></div><p class="hint">層をタップすると、その層だけ高さを変えられます。</p></section>
 
 </section></main><footer><span>PARFAIT ATELIER</span><span>好きなものを、好きなだけ。</span></footer>
 <dialog id="rewards-dialog" aria-labelledby="rewards-title"><div class="dialog-heading"><div><span class="eyebrow">A LITTLE GIFT</span><h2 id="rewards-title">アイテムボックス</h2></div><button data-close="rewards-dialog" class="quiet" aria-label="報酬を閉じる">閉じる ×</button></div><p id="reward-message" role="status"></p><div id="reward-options"></div><div id="bowl-reward"></div><p class="hint">3題を完成すると次の組へ進めます。「別のお題にする」は達成回数に入りません。</p></dialog>
@@ -657,7 +677,7 @@ const {tops,scenes,glasses,layers,album}=data;const content=[...tops,...scenes],
   if(recipe){const ts=recipe[1].split('.').map(Number),ls=recipe[2].split('.').map(Number);if(ts.length>3||ls.length>2||new Set(ts).size!==ts.length||new Set(ls).size!==ls.length||!ts.every(t=>C.topById[t])||!ls.every(l=>C.layerById[l]))return null;const keys=[...ts.map(t=>'top:'+t),...ls.map(l=>'layer:'+l)];return{id,name:C.topById[ts[0]].name+'の重ね仕立て',description:[...ts.map(t=>C.topById[t].name),...ls.map(l=>C.layerById[l].name+'の層')].join(' ＋ '),keys,tops:ts,layers:ls,check:s=>ts.every(t=>has(s,t))&&ls.every(l=>layer(s,l))&&fits(s,ts,ls)};}
   const match=/^mix-([0-9]+)-([0-9]+)$/.exec(id);if(!match)return null;
   const t=C.topById[+match[1]],l=C.layerById[+match[2]];if(!t||!l)return null;
-  const inner=t.category==='crunch';/* cereals live inside the glass; everything else named "飾り" sits on top */
+  const inner=t.category==='crunch'||t.id===40||t.id===41;/* cereals and cut strawberries live inside the glass; everything else named "飾り" sits on top */
   const placed=s=>s.tops.some(x=>(x.id===t.id||(t.id===4&&(x.id===40||x.id===41)))&&(!!x.inside===inner));
   return{id,name:t.name+'と'+l.name,description:(inner?t.name+'をグラスの中に':t.name+'の飾り')+' ＋ '+l.name+'の層',keys:[t.key,l.key],tops:[t.id],layers:[l.id],place:{id:t.id,name:t.name,inside:inner},check:s=>placed(s)&&layer(s,l.id)&&fits(s,[t.id],[l.id])};
  }
@@ -768,8 +788,16 @@ function interiorBand(glass,y){
  const band={left,right,width:Math.max(12,right-left),middle:(left+right)/2,y:row};
  insideBandCache.set(key,band);return band;
 }
+// Every material can go either way: where it is placed decides whether it is inside the glass or on top.
+function canInside(id){return !!Catalog.topById[id];}
+function canTop(id){return !!Catalog.topById[id];}
+function rimLine(){const g=glassConfigs[state.glass];return g.top+Math.max(35,(g.bottom-g.top)*.12);}
 function constrainTop(t){
- if(!t.inside){t.x=clamp(t.x,65,635);t.y=clamp(t.y,65,740);return;}
+ if(!t.inside&&!canTop(t.id))t.inside=true;
+ if(!t.inside){t.x=clamp(t.x,65,635);t.y=clamp(t.y,65,740);
+  // garnish-only items (mint, tuile…) stop at the rim instead of sinking into the glass
+  if(!canInside(t.id)&&t.y>rimLine()-1){const b=interiorBand(state.glass,t.y);if(t.x>b.left-8&&t.x<b.right+8)t.y=rimLine()-1;}
+  return;}
  const g=glassConfigs[state.glass],padding=Math.min(t.size*.18,(g.bottom-g.top)*.15);
  t.y=clamp(t.y,g.top+Math.max(6,padding),g.bottom-Math.max(10,padding));
  let band=interiorBand(state.glass,t.y);
@@ -785,7 +813,7 @@ function addInside(id){
  const g=glassConfigs[state.glass],height=g.bottom-g.top,y=g.top+height*.53,band=interiorBand(state.glass,y),item=Catalog.topById[id],ice=item.category==='ice';
  const n=state.tops.filter(t=>t.inside).length,jitter=n%3-1,size=Math.min(ice?145:id>=42?125:92,band.width*(ice?.73:.6),height*.58);
  state.tops.push(insideItem(id,band.middle+jitter*band.width*.11,y,size,0));
- selected=state.tops.length-1;changed();announceInside(names[id]+'をグラスの中に追加しました');
+ selected=state.tops.length-1;changed();announceInside(names[id]+'をグラスの中に追加しました');tellPlace(true,id);
 }
 function announceInside(message){const live=$('#inside-live');if(live)live.textContent=message;}
 function fillTotal(){return Math.round(layerThickness(state).reduce((a,b)=>a+b,0));}
@@ -797,21 +825,27 @@ let fillBase=null;
 function updateFillTotal(){const r=$('#fill-total'),o=$('#fill-total-out');if(!r)return;const v=fillTotal();r.value=v;r.disabled=!state.layers.length;if(o)o.textContent=v+'%';}
 function useInsideExample(kind){
  snapshot('中身の見本を作る');
- state={glass:kind==='ice'?0:kind==='berry'?2:3,layers:kind==='ice'?[2,6]:kind==='berry'?[2,6,0,1,0]:[2,0,1],tops:[],fillLevel:kind==='ice'?32:kind==='berry'?84:91,scene:state.scene,accent:'none',title:kind==='ice'?'バニラと香ばしいひととき':kind==='berry'?'苺の断面パフェ':'果実を詰めたグラス'};
- const g=glassConfigs[state.glass],h=g.bottom-g.top;
- const add=(id,fx,fy,size,angle=0)=>{const y=g.top+h*fy,b=interiorBand(state.glass,y);state.tops.push(insideItem(id,b.left+b.width*fx,y,size,angle));};
- if(kind==='ice'){
-  add(44,.27,.69,72,-13);add(44,.73,.71,77,10);add(8,.49,.32,151);add(43,.5,.69,156,0);
-  state.tops.push({id:12,x:391,y:g.top-57,size:152,angle:22},{id:9,x:395,y:g.top-7,size:92,angle:0},{id:15,x:302,y:g.top-9,size:67,angle:-12});
- }else if(kind==='berry'){
-  add(45,.45,.88,96,-12);add(43,.53,.73,161,0);add(8,.52,.2,116,0);
-  for(let i=0;i<3;i++)add(40,.15+i*.35,.54,94,(i-1)*-6);
-  add(5,.69,.22,64,9);add(41,.23,.29,57,-16);
-  state.tops.push({id:11,x:345,y:g.top-7,size:174,angle:0},{id:9,x:332,y:g.top-71,size:119,angle:0},{id:40,x:282,y:g.top-39,size:66,angle:-16},{id:40,x:392,y:g.top-40,size:70,angle:15},{id:13,x:403,y:g.top-97,size:120,angle:19});
+ const P={
+  berry:{glass:2,title:'苺の断面',layers:[2,0,13,0],heights:[16,26,20,30]},
+  ice:{glass:3,title:'ショコラとグラノーラ',layers:[5,0,1],heights:[24,40,22]},
+  fruit:{glass:0,title:'果実のジュレ',layers:[1,12,0],heights:[24,46,16]}
+ }[kind]||null;if(!P)return;
+ state={glass:P.glass,layers:P.layers.slice(),layerHeights:P.heights.slice(),tops:[],scene:state.scene,accent:'none',title:P.title};
+ const g=glassConfigs[state.glass],h=g.bottom-g.top,cx=350;
+ // y of a point inside layer i, at fraction f of that layer (0 = bottom, 1 = top)
+ const ly=(i,f=.5)=>g.bottom-h*(P.heights.slice(0,i).reduce((a,b)=>a+b,0)+P.heights[i]*f)/100;
+ const row=(id,i,n,size,f=.5,spread=.72,tilt=6)=>{const y=ly(i,f),b=interiorBand(state.glass,y);for(let k=0;k<n;k++){const u=n===1?.5:k/(n-1);state.tops.push(insideItem(id,b.middle+(u-.5)*b.width*spread,y,size,(u-.5)*2*tilt));}};
+ const top=(id,dx,dy,size,angle=0)=>state.tops.push({id,x:cx+dx,y:g.top+dy,size,angle});
+ if(kind==='berry'){
+  row(40,2,3,58,.5,.62);
+  top(8,-26,-8,86);top(11,2,26,120);top(40,40,-4,54,16);top(15,20,-30,38);top(7,-12,-48,38,-12);
+ }else if(kind==='ice'){
+  row(43,0,3,74,.55,.62,10);
+  row(8,1,1,128,.5,0,0);
+  top(23,-30,-14,88);top(11,4,20,118);top(12,46,-24,72,18);top(15,26,-2,40,10);top(7,-6,-50,36,-14);
  }else{
-  [[.18,.21],[.51,.17],[.79,.28],[.3,.46],[.69,.49],[.16,.66],[.48,.76],[.79,.72]].forEach(([x,y],i)=>add(i%3?41:40,x,y,83,(i%3-1)*22));
-  add(5,.38,.88,53,0);
-  state.tops.push({id:11,x:354,y:g.top-27,size:191,angle:0},{id:8,x:316,y:g.top-89,size:113,angle:0},{id:9,x:401,y:g.top-77,size:97,angle:0},{id:40,x:309,y:g.top-123,size:70,angle:-13},{id:7,x:412,y:g.top-119,size:73,angle:17});
+  row(41,1,3,48,.7,.66,10);row(5,1,2,30,.42,.66,0);row(5,1,2,30,.24,.3,0);
+  top(9,-24,-10,84);top(11,2,22,104);top(41,38,-2,46,14);top(5,22,-30,30);top(7,-6,-48,36,-12);
  }
  selected=-1;tab='inside';changed();announceInside('見本を作りました。位置や素材を変えて仕立てられます。「取り消す」で前の作品に戻せます。');
 }
@@ -861,6 +895,13 @@ function questInvite(){
  const note=inviteNote;inviteNote='';
  return '<section class="quest-invite'+(note?' invite-flash':'')+'" aria-label="今日のひとしな"><span class="invite-eyebrow">今日のひとしな</span><h2>今日のお題：'+esc(q.name)+'</h2><p class="invite-desc">'+esc(q.description)+'</p>'+(note?'<p class="invite-note">'+esc(note)+'</p>':'')+'<div class="invite-row"><button class="primary" data-quest="'+slot.id+'">このお題で作る</button>'+(left?'<span class="invite-count">あと'+left+'杯で箱が届く</span>':'')+'</div><p class="invite-hint">箱からは、まだ持っていない器や素材がひとつ出てきます。</p></section>';
 }
+function placeChip(inside){
+ const glass='<path d="M7 5h18l-2.4 15.5a6.6 6.6 0 0 1-13.2 0z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16 27v4M11 31h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>';
+ const mark=inside?'<path d="M8.6 11h14.8l-1.6 9.5a5.8 5.8 0 0 1-11.6 0z" fill="#d9879f" opacity=".75"/>':'<circle cx="16" cy="3.2" r="3.4" fill="#d9879f"/><circle cx="11.5" cy="4.3" r="2.2" fill="#e9b6c5"/>';
+ return '<p class="place-chip '+(inside?'is-inside':'is-top')+'"><svg viewBox="0 0 32 34" aria-hidden="true">'+(inside?glass+mark:mark+glass)+'</svg><span>'+(inside?'グラスの<b>中</b>に入れます':'グラスの<b>上</b>に飾ります')+'</span><button type="button" class="place-switch" data-tab="'+(inside?'toppings':'inside')+'">'+(inside?'上に飾るなら「飾り」':'中に入れるなら「中身」')+'</button></p>';
+}
+const placeTold={};
+function tellPlace(inside,id){const k=inside?'in':'top';if(placeTold[k])return;placeTold[k]=true;toast(names[id]+(inside?'をグラスの中に入れました':'をグラスの上に飾りました'));}
 function homeNote(){const n=inviteNote;inviteNote='';return n?'<p class="home-note">'+esc(n)+'</p>':'';}
 function renderPanel(){
  const storage=$('#home-storage');
@@ -869,26 +910,28 @@ function renderPanel(){
  document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab);b.setAttribute('aria-pressed',String(b.dataset.tab===tab));});
  let html='';
  if(tab==='home'){
-  html=homeNote()+'<div id="home-modes"></div>'+(profile.quest==='free'?'<section class="inside-intro"><span class="inside-eyebrow">INSIDE THE GLASS</span><h2>グラスの中に、好きなかたち。</h2><p>果物の断面も、丸いアイスも。<br>層と組み合わせて、内側を仕立てましょう。</p><details class="inside-examples"><summary>見本から作ってみる</summary><div class="example-buttons"><button data-inside-example="berry">苺の断面</button><button data-inside-example="ice">アイスとシリアル</button><button data-inside-example="fruit">果実ぎっしり</button></div><p class="hint">今の盛り付けが見本に切り替わります。「取り消す」で戻せます。</p></details></section>':'')+'<div id="home-finish"></div>';
+  html=homeNote()+'<div id="home-modes"></div>'+(profile.quest==='free'?'<section class="inside-intro"><span class="inside-eyebrow">INSIDE THE GLASS</span><h2>グラスの中に、好きなかたち。</h2><p>果物の断面も、丸いアイスも。<br>層と組み合わせて、内側を仕立てましょう。</p><details class="inside-examples"><summary>見本から作ってみる</summary><div class="example-buttons"><button data-inside-example="berry">苺の断面</button><button data-inside-example="ice">ショコラとグラノーラ</button><button data-inside-example="fruit">果実のジュレ</button></div><p class="hint">今の盛り付けが見本に切り替わります。「取り消す」で戻せます。</p></details></section>':'')+'<div id="home-finish"></div>';
  }
  else if(tab==='glass')html='<div class="choice-strip"><div class="choice-items">'+Catalog.glasses.map(g=>itemCard(g,state.glass===g.id,'data-glass="'+g.id+'"')).join('')+'</div></div>';
  else if(tab==='layers')html=fillControl()+'<section class="jelly-palette" aria-labelledby="jelly-heading"><h2 id="jelly-heading">透けるジュレ</h2><p>透明とピンク。気泡を閉じ込めた、とろりと透けるゼリーの層。</p><div class="grid jelly-grid">'+Catalog.layers.filter(i=>i.type==='jelly'&&!i.retired).map(i=>itemCard(i,false,'data-fill="'+i.id+'"').replace('<span>'+i.name+'</span>','<span>'+i.name.replace(/ジュレ$/,'<br>ジュレ')+'</span>')).join('')+'</div></section><h2 class="layer-group-heading">ピューレ・クリーム・ミックス</h2><div class="grid">'+Catalog.layers.filter(i=>i.type!=='jelly').sort((a,b)=>([2,3].includes(a.id)?0:1)-([2,3].includes(b.id)?0:1)).map(i=>itemCard(i,false,'data-fill="'+i.id+'"')).join('')+'</div>';
  else if(tab==='inside'){
-  const cats={fruit:'フルーツ',ice:'アイス',crunch:'シリアルなど'};
-  const entries=Catalog.tops.filter(t=>insideSubtab==='crunch'?(t.category==='crunch'||[11,12,39].includes(t.id)):t.category===insideSubtab).sort((a,b)=>(a.id>=40?-1:0)-(b.id>=40?-1:0));
+  const cats={fruit:'フルーツ',ice:'アイス',crunch:'その他'};
+  const entries=Catalog.tops.filter(t=>insideSubtab==='crunch'?(t.category==='crunch'||t.category==='other'):t.category===insideSubtab).sort((a,b)=>(a.id>=40?-1:0)-(b.id>=40?-1:0));
 
+  html+=placeChip(true);
   html+='<div class="subtabs inside-categories" aria-label="中身のカテゴリ">'+Object.entries(cats).map(([id,label])=>'<button data-inside-subtab="'+id+'" class="'+(insideSubtab===id?'active':'')+'" aria-pressed="'+(insideSubtab===id)+'">'+label+'</button>').join('')+'</div>';
 
   html+='<div class="grid inside-grid">'+entries.map(t=>itemCard(t,false,'data-inside-top="'+t.id+'"')).join('')+'</div>';
 
  }else if(tab==='toppings'){
-  html='<div class="subtabs" aria-label="飾りのカテゴリ">'+['fruit','ice','other'].map(id=>{const items=Catalog.tops.filter(t=>t.category===id);return '<button data-subtab="'+id+'" class="'+(id===subtab?'active':'')+'" aria-pressed="'+(id===subtab)+'">'+Catalog.categoryNames[id]+' <small>'+items.filter(t=>Atelier.owns(profile,t.key)).length+'/'+items.length+'</small></button>';}).join('')+'</div><div class="grid">'+Catalog.tops.filter(t=>t.category===subtab).map(t=>itemCard(t,false,'data-top="'+t.id+'"')).join('')+'</div>';
+  html=placeChip(false)+'<div class="subtabs" aria-label="飾りのカテゴリ">'+['fruit','ice','other'].map(id=>{const items=Catalog.tops.filter(t=>t.category===id||(id==='other'&&t.category==='crunch'));return '<button data-subtab="'+id+'" class="'+(id===subtab?'active':'')+'" aria-pressed="'+(id===subtab)+'">'+Catalog.categoryNames[id]+' <small>'+items.filter(t=>Atelier.owns(profile,t.key)).length+'/'+items.length+'</small></button>';}).join('')+'</div><div class="grid">'+Catalog.tops.filter(t=>t.category===subtab||(subtab==='other'&&t.category==='crunch')).map(t=>itemCard(t,false,'data-top="'+t.id+'"')).join('')+'</div>';
  }else html='<div class="choice-strip"><div class="choice-items scene-items">'+Catalog.scenes.map(s=>itemCard(s,state.scene===s.id,'data-scene="'+s.id+'"')).join('')+'</div></div>';
  $('#panel').innerHTML=html;
  if(tab==='home'){
   const modes=$('#home-modes'),finish=$('#home-finish');
   if(modes&&finish){const j=document.querySelector('.journey'),f=document.querySelector('.creation-finish');if(j)modes.append(j);if(f)finish.append(f);}
  }
+ updateCoach();
 }
 function renderLayers(){
  updateFillTotal();
@@ -898,6 +941,7 @@ function renderLayers(){
  const maximum=Math.max(heights[i],roomForLayer(i));
  return '<div class="layer-row '+(selectedLayer===i?'layer-row-active':'')+'" data-layer-row="'+i+'"><span class="dot" style="background:'+fills[v][1]+'"></span><span class="name">'+fills[v][0]+'</span><div class="layer-thickness"><label for="layer-height-'+i+'">層の高さ</label><input id="layer-height-'+i+'" data-layer-height="'+i+'" type="range" min="0" max="'+Math.max(1,maximum)+'" step="1" value="'+Math.round(heights[i])+'" aria-label="'+fills[v][0]+'の高さ"><output id="layer-height-out-'+i+'">'+Math.round(heights[i])+'%</output></div><div class="layer-buttons"><button data-move="'+i+',1" aria-label="'+fills[v][0]+'を上へ" '+(i===state.layers.length-1?'disabled':'')+'>↑</button><button data-move="'+i+',-1" aria-label="'+fills[v][0]+'を下へ" '+(i===0?'disabled':'')+'>↓</button><button data-remove-layer="'+i+'" aria-label="'+fills[v][0]+'を削除">×</button></div></div>';}).join(''):'<p class="hint">「層」から素材を重ねられます。中身だけのパフェも作れます。</p>';
 }
+document.addEventListener('click',e=>{const row=e.target.closest('#layer-list .layer-row');if(!row||e.target.closest('button,input,label'))return;const i=+row.dataset.layerRow;selectedLayer=selectedLayer===i?-1:i;renderLayers();draw();});
 function renderSelection(){
  if(tab!=='inside'&&tab!=='toppings'){$('#selection').innerHTML='';$('#trash-selected').disabled=true;$('#selected-item-label').textContent='素材は「中身」「飾り」で編集できます';return;}
  if(selected>=0&&!!state.tops[selected]?.inside!==(tab==='inside'))selected=-1;
@@ -1082,6 +1126,24 @@ function drawDesign(c,s,selection=-1){
 }
 function draw(){drawDesign(ctx,state,selected);const ds=document.getElementById('deselect');if(ds)ds.disabled=!state.tops[selected];}
 function render(){renderPanel();renderLayers();renderSelection();renderProgress();draw();updateHistory();$('#creation-title').value=state.title;}
+function coachDone(){try{return localStorage.getItem('parfait-atelier-coach')==='done';}catch{return false;}}
+function updateCoach(){
+ const box=$('#coach');if(!box)return;
+ document.querySelectorAll('.tabs .coach-target').forEach(b=>b.classList.remove('coach-target'));
+ if(coachDone()||profile.fingerprints.length){box.hidden=true;return;}
+ const q=activeQuest(),quest=!!q,needIn=!q||!q.place||q.place.inside,needTop=!q||!q.place||!q.place.inside;
+ const inside=!needIn||state.tops.some(t=>t.inside),top=!needTop||state.tops.some(t=>!t.inside);
+ const steps=[
+  [!state.layers.length,'layers',0,'まずは「層」から、好きな層をひとつ選んでみよう。'],
+  [!inside,'inside',0,(quest?'次は「中身」。「お題」の印が付いた素材を、グラスの中に入れてみよう。':'次は「中身」。いちごの断面やアイスを、グラスの中に入れてみよう。')],
+  [!top,'toppings',0,(quest?'次は「飾り」。「お題」の印が付いた素材を、グラスの上に飾ろう。':'「飾り」で、グラスの上を仕上げよう。')],
+  [true,'home',0,quest?'できあがり。「ホーム」の「お題を達成する」で届けよう。':'できあがり。名前を付けて「ホーム」から保存しよう。']];
+ const shown=steps.filter((x,i)=>i===0||i===3||(i===1?needIn:needTop)),k=shown.findIndex(x=>x[0]),[,target,,text]=shown[k],n=(k+1)+'/'+shown.length;
+ box.hidden=false;
+ box.innerHTML='<span class="coach-step">'+n+'</span><p>'+text+'</p>'+(tab!==target?'<button class="coach-go" data-tab="'+target+'">開く</button>':'')+'<button class="coach-close" id="coach-close" aria-label="ガイドを閉じる">×</button>';
+ const t=document.querySelector('.tabs [data-tab="'+target+'"]');if(t&&tab!==target)t.classList.add('coach-target');
+}
+document.addEventListener('click',e=>{if(e.target.closest('#coach-close')){try{localStorage.setItem('parfait-atelier-coach','done');}catch{}updateCoach();}});
 function changed(){history.finish(state);profile.draft=state;render();persist();}
 function changeGlass(id){
  if(!Atelier.owns(profile,'glass:'+id)||id===state.glass)return;
@@ -1165,7 +1227,7 @@ document.addEventListener('click',e=>{
  if(b.dataset.insideTop!==undefined){if(questAssist()==='easy'&&!Atelier.questAllows(activeQuest(),'top:'+b.dataset.insideTop)){toast('今日のお題では使わない材料です');return;}addInside(+b.dataset.insideTop);return;}
  if(b.dataset.insideExample){useInsideExample(b.dataset.insideExample);return;}
  if(b.dataset.location){
-  const t=state.tops[selected];if(!t)return;const inside=b.dataset.location==='inside';if(!!t.inside===inside)return;
+  const t=state.tops[selected];if(!t)return;const inside=b.dataset.location==='inside';if(!!t.inside===inside||(inside?!canInside(t.id):!canTop(t.id)))return;
   snapshot('素材を置く場所の変更');
   if(inside){t.inside=true;t.y=(glassConfigs[state.glass].top+glassConfigs[state.glass].bottom)/2;constrainTop(t);}
   else{delete t.inside;t.y=glassConfigs[state.glass].top-35;constrainTop(t);}
@@ -1182,12 +1244,11 @@ document.addEventListener('click',e=>{
  if(b.dataset.tab){tab=b.dataset.tab;selected=-1;selectedLayer=-1;renderPanel();renderLayers();renderSelection();draw();return;}
  if(b.dataset.glass!==undefined){changeGlass(+b.dataset.glass);return;}
  if(b.dataset.fill!==undefined){if(!Atelier.owns(profile,'layer:'+b.dataset.fill))return;if(questAssist()==='easy'&&!Atelier.questAllows(activeQuest(),'layer:'+b.dataset.fill)){toast('今日のお題では使わない材料です');return;}if(state.layers.length>=14){fileMessage('層は14段までです。今ある層を入れ替えてみましょう。');return;}snapshot('層の追加');ensureLayerHeights();{
- // A tap always shows the new layer: if the glass is full, the other layers make room for it, keeping their proportions.
- const n=state.layers.length,want=Math.min(16,Math.max(8,100/(n+1))),sum=state.layerHeights.reduce((a,v)=>a+v,0),room=Math.max(0,100-sum);
- let thickness=Math.min(16,room);
- if(thickness<want){thickness=want;const keep=Math.max(0,100-want);if(sum>keep&&sum>0)state.layerHeights=state.layerHeights.map(h=>h*keep/sum);toast('グラスがいっぱいなので、ほかの層を少しずつ薄くしました');}
+ // Start full, then trim: the first layer fills the glass; each new layer takes an equal share of the current total and the others shrink in proportion.
+ const n=state.layers.length,sum=state.layerHeights.reduce((a,v)=>a+v,0),total=n&&sum>=1?Math.min(100,sum):100,thickness=total/(n+1);
+ if(n&&sum>0)state.layerHeights=state.layerHeights.map(h=>h*(total-thickness)/sum);
  state.layers.push(+b.dataset.fill);state.layerHeights.push(thickness);}}
- else if(b.dataset.top!==undefined){if(!Atelier.owns(profile,'top:'+b.dataset.top))return;if(questAssist()==='easy'&&!Atelier.questAllows(activeQuest(),'top:'+b.dataset.top)){toast('今日のお題では使わない材料です');return;}if(state.tops.length>=300){fileMessage('中身と飾りは合わせて300個までです。');return;}snapshot('飾りの追加');state.tops.push({id:+b.dataset.top,x:350,y:glassConfigs[state.glass].top-35,size:115,angle:0});selected=state.tops.length-1;}
+ else if(b.dataset.top!==undefined){if(!Atelier.owns(profile,'top:'+b.dataset.top))return;if(questAssist()==='easy'&&!Atelier.questAllows(activeQuest(),'top:'+b.dataset.top)){toast('今日のお題では使わない材料です');return;}if(state.tops.length>=300){fileMessage('中身と飾りは合わせて300個までです。');return;}snapshot('飾りの追加');state.tops.push({id:+b.dataset.top,x:350,y:glassConfigs[state.glass].top-35,size:115,angle:0});selected=state.tops.length-1;tellPlace(false,+b.dataset.top);}
  else if(b.dataset.move){const [i,d]=b.dataset.move.split(',').map(Number);if(!Number.isInteger(state.layers[i+d]))return;snapshot();ensureLayerHeights();[state.layers[i],state.layers[i+d]]=[state.layers[i+d],state.layers[i]];[state.layerHeights[i],state.layerHeights[i+d]]=[state.layerHeights[i+d],state.layerHeights[i]];}
  else if(b.dataset.removeLayer!==undefined){snapshot();ensureLayerHeights();state.layers.splice(+b.dataset.removeLayer,1);state.layerHeights.splice(+b.dataset.removeLayer,1);}
  else if(b.dataset.scene){if(!Atelier.owns(profile,'scene:'+b.dataset.scene))return;snapshot('背景の変更');state.scene=b.dataset.scene;}
@@ -1328,7 +1389,9 @@ function endCanvasPointer(commit=true){
  if(gesture.kind==='item'){
   if(!ownsGesture)return;
   if(commit){
-   if(gesture.moved && !gesture.item.inside && isDroppedInside(gesture.item)){gesture.item.inside=true;constrainTop(gesture.item);}
+   if(gesture.moved && !gesture.item.inside && canInside(gesture.item.id) && isDroppedInside(gesture.item)){gesture.item.inside=true;constrainTop(gesture.item);gesture.switched=!gesture.switched;}
+   if(gesture.switched)toast(names[gesture.item.id]+(gesture.item.inside?'をグラスの中に入れました':'をグラスの上に飾りました'));
+   else if(gesture.moved&&!gesture.item.inside&&!canInside(gesture.item.id)&&isDroppedInside({...gesture.item,y:gesture.item.y+2}))toast(names[gesture.item.id]+'はグラスの上に飾る素材です');
    tab=gesture.item.inside?'inside':'toppings';
    selectedLayer=-1;
    finishGesture();renderPanel();renderSelection();draw();
@@ -1354,7 +1417,7 @@ function moveCanvasPointer(e){
   gesture.item.y=gesture.originY+dy*gesture.scaleY;
   const g=glassConfigs[state.glass];
   // Switching in/out happens only at intentional crossings, not on each pixel.
-  if(gesture.item.inside&&gesture.item.y<g.top-25)delete gesture.item.inside;
+  if(gesture.item.inside&&gesture.item.y<g.top-25&&canTop(gesture.item.id)){delete gesture.item.inside;gesture.switched=!gesture.switched;}
   constrainTop(gesture.item);
   // Drawing the selection outline does not change the height of the editor.
   draw();
@@ -1551,8 +1614,8 @@ function resetProfile(){const before=profile,previous=state;profile=Atelier.init
    if(tab==='glass')add('#panel .choice-items',F.glass-C.glasses.length);
    else if(tab==='photo')add('#panel .scene-items',F.scene-C.scenes.length);
    else if(tab==='layers'){add('#panel .jelly-grid',5-C.layers.filter(l=>l.type==='jelly').length);const gs=document.querySelectorAll('#panel .grid:not(.jelly-grid)');const g=gs[gs.length-1];const n=(F.layer-5)-C.layers.filter(l=>l.type!=='jelly').length;if(g&&n>0&&!g.querySelector('.trial-more'))g.insertAdjacentHTML('beforeend',card(n));}
-   else if(tab==='inside'){const cat=insideSubtab;const have=C.tops.filter(t=>cat==='crunch'?(t.category==='crunch'||[11,12,39].includes(t.id)):t.category===cat).length;const full=cat==='crunch'?F.tops.crunch+3:(F.tops[cat]||0);add('#panel .inside-grid',full-have);}
-   else if(tab==='toppings'){const have=C.tops.filter(t=>t.category===subtab).length;add('#panel .grid',(F.tops[subtab]||0)-have);}
+   else if(tab==='inside'){const cat=insideSubtab;const have=C.tops.filter(t=>cat==='crunch'?(t.category==='crunch'||t.category==='other'):t.category===cat).length;const full=cat==='crunch'?F.tops.crunch+F.tops.other:(F.tops[cat]||0);add('#panel .inside-grid',full-have);}
+   else if(tab==='toppings'){const have=C.tops.filter(t=>t.category===subtab||(subtab==='other'&&t.category==='crunch')).length;const full=(F.tops[subtab]||0)+(subtab==='other'?F.tops.crunch:0);add('#panel .grid',full-have);}
   }catch(e){}
  };
  // the trial ends with a gentle note once the one box has been received
