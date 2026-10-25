@@ -26,6 +26,8 @@
     .gallery-image { overflow:hidden; background:#f0eee7; aspect-ratio:4/3; }
     .gallery-image img { display:block; width:100%; height:100%; object-fit:cover; transition:transform .3s ease; }
     .gallery-card:hover img { transform:scale(1.025); }
+    .card-link { display:block; color:inherit; text-decoration:none; }
+    .karimono-card .button-row { margin-top:12px; }
     #works .gallery-image { aspect-ratio:2/1; background:#edf0e7; }
     #works .gallery-image-dark { background:#080808; }
     #works .gallery-image img { object-fit:contain; }
