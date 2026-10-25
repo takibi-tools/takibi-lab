@@ -179,3 +179,7 @@
       .product-copy .gallery-caption h3 { font-size:22px; }
       .product-copy p { margin-top:12px; }
     }
+    /* 広い画面では小さな作品を3列に並べ、作品が増えても縦に伸びすぎないようにする。 */
+    @media (min-width:1051px) {
+      #works .gallery { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    }
