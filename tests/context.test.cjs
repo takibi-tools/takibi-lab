@@ -26,7 +26,7 @@ function setup(){
     if(data?.http)return {ok:false,status:data.http,json:async()=>({error:{message:'Synthetic API failure'}})};
     return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:JSON.stringify(data)}]}}]})};}
  };
- vm.runInNewContext(script,sandbox);el('apikey').value='synthetic-key-not-a-real-credential';el('reply').value=input;
+ vm.runInNewContext(script,sandbox);el('trial-method').value='gemini';el('apikey').value='synthetic-key-not-a-real-credential';el('reply').value=input;
  return {el,queue,requests,run:()=>el('run').handlers.click(),sample:()=>el('sample').handlers.click(),timers,intervals};
 }
 function checkNote(e,shown){assert.equal(e.el('context-note').hidden,!shown);assert.equal(e.el('context-note').textContent,shown?notice:'');}

@@ -68,11 +68,11 @@
   .config-lead{font-size:12.5px;color:var(--ink-soft);line-height:1.7;margin:-14px 0 22px}
   .config-body{padding:4px 16px 18px;display:grid;gap:14px}
   .field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.04em}
-  .field input{
+  .field input,.field select{
     width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:4px;
     font-size:14px;font-family:var(--body);background:#FCFCFA;color:var(--ink);
   }
-  .field input:focus{outline:2px solid var(--ink);outline-offset:-1px}
+  .field input:focus,.field select:focus{outline:2px solid var(--ink);outline-offset:-1px}
   .config-note{font-size:12px;color:var(--ink-soft);line-height:1.7}
   .config-note a{color:var(--ai)}
 
@@ -209,17 +209,25 @@
   </div>
 
   <details class="config" id="config">
-    <summary>API key settings</summary>
+    <summary>How to use / API key</summary>
     <div class="config-body">
-      <div class="field">
+      <div class="field" id="trial-entry">
+        <label for="trial-method">How to use</label>
+        <select id="trial-method">
+          <option value="free">Free (no key, 3 per day)</option>
+          <option value="gemini">Your own Gemini key (no daily limit)</option>
+        </select>
+      </div>
+      <p class="config-note" id="free-note">No API key needed. You can run up to 3 inspections a day for free (the count resets at midnight Japan time). Your text is sent through Yomitoki’s server to Google’s Gemini for the inspection. The server does not store your text.</p>
+      <div class="field" id="apikey-field" hidden>
         <label for="apikey">Gemini API key</label>
         <input type="password" id="apikey" placeholder="AIza..." autocomplete="off">
       </div>
-      <p class="config-note">Yomitoki uses a Gemini API key. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a key from Google AI Studio</a> and paste it here. Usage limits and charges depend on your Google settings. Your key is stored in this browser and used to authenticate with Google’s API. On a shared device, clear the key field when you finish.</p>
+      <p class="config-note" id="apikey-note" hidden><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a Gemini key from Google AI Studio</a> and paste it here. <strong>With a free-tier Gemini key, you may see errors such as “Gemini is busy” or “usage limit reached.”</strong> If that happens, wait a moment or switch to Free. Usage limits and charges depend on your Google settings. Your key is stored in this browser and used only to authenticate with Google’s API. On a shared device, clear the key field when you finish.</p>
     </div>
   </details>
 
-  <p class="config-lead">To inspect your own text, open the settings and enter your API key.</p>
+  <p class="config-lead" id="access-guide">No API key needed: you can inspect up to 3 texts a day for free. If you have your own Gemini API key, add it in the settings for unlimited use.</p>
 
   <div class="input-block">
     <label for="question">Original question / context <span class="opt">[Recommended]</span></label>
@@ -291,6 +299,72 @@
 
   $("apikey").value = recall("yomitoki_key");
   var MODEL = "gemini-2.5-flash";
+
+  /* ── Free use (no key, 3 per day) ──
+     Yomitoki’s server holds the API key. Never put a key in this page. */
+  var TRIAL_ENDPOINT = "https://yomitoki-free.takibilab.workers.dev";
+  var trialActive = false, trialSessionToken = null;
+  // A throwaway ID so the 3-per-day limit counts per browser. It is not linked to any name or key.
+  function clientId(){
+    var id = recall("yomitoki_client");
+    if(!/^[a-f0-9]{32}$/.test(id)){
+      var bytes = new Uint8Array(16);
+      try{ crypto.getRandomValues(bytes); }catch(e){ for(var i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256); }
+      id = Array.prototype.map.call(bytes, function(x){ return ("0" + x.toString(16)).slice(-2); }).join("");
+      store("yomitoki_client", id);
+    }
+    return id;
+  }
+  function accessMode(){ return $("trial-method").value === "gemini" ? "gemini" : "free"; }
+  (function initAccess(){
+    var saved = recall("yomitoki_access");
+    $("trial-method").value = (saved === "gemini" || saved === "free") ? saved : (recall("yomitoki_key") ? "gemini" : "free");
+  })();
+  function updateAccessDisplay(){
+    var m = accessMode();
+    $("free-note").hidden = m !== "free";
+    $("apikey-field").hidden = m !== "gemini";
+    $("apikey-note").hidden = m !== "gemini";
+    $("access-guide").textContent = m === "free"
+      ? "No API key needed: you can inspect up to 3 texts a day for free. If you have your own Gemini API key, add it in the settings for unlimited use."
+      : "This uses your own Gemini API key. Open the settings and enter it.";
+  }
+  $("trial-method").addEventListener("change", function(){ store("yomitoki_access", this.value); updateAccessDisplay(); });
+  updateAccessDisplay();
+  // Errors are always shown in plain English: what happened and what to do next.
+  function trialMessage(status, body){
+    var code = (body && body.error && body.error.code) || "";
+    if(code === "daily_limit") return "You have used today’s 3 free inspections. Please come back tomorrow (resets at midnight Japan time).";
+    if(code === "network_limit") return "Today’s free inspections from this network have reached the limit. Please try again tomorrow.";
+    if(code === "global_limit") return "Today’s free inspections for all users have been used up. Please try again tomorrow.";
+    if(code === "session_expired") return "The free session expired. Please run the inspection again.";
+    if(code === "stopped") return "Free use is currently paused. Please use your own Gemini API key.";
+    if(code === "busy" || status === 429 || status >= 500) return "Gemini is busy right now. Please wait a moment and try again.";
+    return "Yomitoki’s free server returned an error. Please try again later.";
+  }
+  function geminiMessage(status, body){
+    var raw = String((body && body.error && body.error.message) || "");
+    if(status === 400 && /API key/i.test(raw)) return "The Gemini API key is invalid. Check that you copied the whole key from Google AI Studio (it starts with “AIza”).";
+    if(status === 400) return "Gemini could not accept this request. Try a shorter text or try again later.";
+    if(status === 401 || status === 403) return "This Gemini key cannot be used here. Check the key and its permissions in Google AI Studio.";
+    if(status === 404) return "The model is not available for this key. Check that your key is valid and enabled in Google AI Studio.";
+    if(status === 429) return "The Gemini usage limit was reached. Free-tier keys can stop after several runs in a short time. Wait a moment, or switch to Free in the settings.";
+    if(status >= 500) return "Gemini is busy right now. This happens more often with free-tier keys. Wait a moment, or switch to Free in the settings.";
+    return "Gemini returned an error (code " + status + "). Please try again later.";
+  }
+  function trialRequest(path, data, ctrl){
+    var options = { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(data) };
+    if(ctrl && ctrl.signal) options.signal = ctrl.signal;
+    return fetch(TRIAL_ENDPOINT + path, options).catch(function(err){
+      if(err && err.name === "AbortError") throw new Error("The request timed out. Please try again.");
+      throw new Error("Could not reach Yomitoki’s free server. Check your internet connection and try again.");
+    }).then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(body){
+        if(!res.ok){ var e = new Error(trialMessage(res.status, body)); e.trialLimit = res.status === 429; throw e; }
+        return body;
+      });
+    });
+  }
 
   $("apikey").addEventListener("change", function(){ store("yomitoki_key", this.value.trim()); });
   $("apikey").addEventListener("input", function(){ if(!this.value.trim()) store("yomitoki_key", ""); });
@@ -456,8 +530,12 @@ CRITERIA,
   /* ── Gemini API ── */
   var TIMEOUT_MS = 90000;
   function callGemini(key, model, prompt, ctrl){
-    var url = "https://generativelanguage.googleapis.com/v1beta/models/"
-            + encodeURIComponent(model) + ":generateContent";
+    var url = trialActive ? (TRIAL_ENDPOINT + "/generate")
+      : ("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent");
+    var payload = {
+      contents:[{ role:"user", parts:[{ text: prompt }] }],
+      generationConfig:{ temperature:0.2, responseMimeType:"application/json" }
+    };
     var timer = null;
     if(!ctrl && typeof AbortController !== "undefined"){ ctrl = new AbortController(); }
     var signal = ctrl ? ctrl.signal : undefined;
@@ -465,23 +543,17 @@ CRITERIA,
     return fetch(url, {
       method:"POST",
       signal: signal,
-      headers:{ "Content-Type":"application/json", "x-goog-api-key":key },
-      body: JSON.stringify({
-        contents:[{ role:"user", parts:[{ text: prompt }] }],
-        generationConfig:{ temperature:0.2, responseMimeType:"application/json" }
-      })
+      headers: trialActive ? { "Content-Type":"application/json" } : { "Content-Type":"application/json", "x-goog-api-key":key },
+      body: JSON.stringify(trialActive ? { sessionToken: trialSessionToken, payload: payload } : payload)
     }).catch(function(err){
       if(err && err.name === "AbortError") throw new Error("The request timed out. Please try again.");
       throw new Error("The connection failed. Check your internet connection.");
     }).then(function(res){
       if(!res.ok){
         return res.json().catch(function(){ return {}; }).then(function(body){
-          var msg = (body && body.error && body.error.message) ? body.error.message : ("HTTP " + res.status);
-          if(res.status === 400 && /API key/i.test(msg)) msg = "The API key is invalid. Yomitoki requires a Gemini API key.";
-          if(res.status === 403) msg = "This key cannot be used here. Check its permissions.";
-          if(res.status === 404) msg = "Could not access the model. Check that your key is valid and enabled in Google AI Studio.";
-          if(res.status === 429) msg = "The API usage limit was reached. Please wait before trying again.";
-          throw new Error(msg);
+          var e = new Error(trialActive ? trialMessage(res.status, body) : geminiMessage(res.status, body));
+          if(trialActive) e.trialLimit = res.status === 429 && /limit/.test((body && body.error && body.error.code) || "");
+          throw e;
         });
       }
       return res.json().catch(function(err){
@@ -656,6 +728,7 @@ CRITERIA,
   }
   $("run").addEventListener("click", function(){
     if($("run").disabled) return;
+    var isTrial = accessMode() === "free";
     var key   = $("apikey").value.trim();
     var model = MODEL;
     var question = $("question").value.trim();
@@ -663,10 +736,13 @@ CRITERIA,
     var status = $("status");
 
     status.classList.remove("error");
-    if(!key){ status.textContent = "Enter a Gemini API key to inspect your own text."; status.classList.add("error"); $("config").open = true; $("apikey").focus(); return; }
+    if(!isTrial && !key){ status.textContent = "Enter your Gemini API key. If you don’t have one, choose “Free” under How to use in the settings."; status.classList.add("error"); $("config").open = true; $("apikey").focus(); return; }
     if(!reply){ status.textContent = "Paste an AI reply first."; status.classList.add("error"); return; }
 
-    store("yomitoki_key", key);
+    if(!isTrial) store("yomitoki_key", key);
+    trialActive = isTrial;
+    trialSessionToken = null;
+    var trialRemaining = null;
 
     var btn = $("run");
     var myRun = ++runId;
@@ -679,7 +755,14 @@ CRITERIA,
     setContextNote(false);
     $("copied").textContent = "";
 
-    return callGemini(key, model, buildPrompt(question, reply), currentCtrl)
+    var firstPass = isTrial
+      ? trialRequest("/start", { clientId: clientId() }, currentCtrl).then(function(v){
+          if(myRun !== runId) throw new Error("The inspection was stopped.");
+          trialSessionToken = v.sessionToken;
+          return callGemini(key, model, buildPrompt(question, reply), currentCtrl);
+        })
+      : callGemini(key, model, buildPrompt(question, reply), currentCtrl);
+    return firstPass
       .then(function(result){
         if(myRun !== runId) return;
         validateSegments(result, reply);
@@ -694,15 +777,23 @@ CRITERIA,
             throw err;
           });
       })
-      .then(function(){ if(myRun === runId){ stopTick(); status.setAttribute("aria-live", "polite"); status.textContent = "Inspection complete."; } })
+      .then(function(){
+        if(isTrial && myRun === runId) return trialRequest("/finish", { sessionToken: trialSessionToken }, currentCtrl)
+          .then(function(v){ trialRemaining = v.remaining; }).catch(function(){ /* the result is already shown */ });
+      })
+      .then(function(){ if(myRun === runId){ stopTick(); status.setAttribute("aria-live", "polite"); status.textContent = "Inspection complete." + (isTrial ? (typeof trialRemaining === "number" ? " (Free: " + trialRemaining + " left today)" : " (Free)") : ""); } })
       .catch(function(err){
         if(myRun !== runId) return;
         stopTick();
         status.setAttribute("aria-live", "polite");
-        status.textContent = err.message || "The inspection failed.";
+        var em = err.message || "The inspection failed.";
+        // Never show a message that is not in English.
+        if(/[ぁ-んァ-ヶ一-龠]/.test(em)) em = "The inspection failed. Please try again later.";
+        if(err.trialLimit) em += " Add your own Gemini API key in the settings to keep going.";
+        status.textContent = em;
         status.classList.add("error");
       })
-      .then(function(){ if(myRun === runId){ stopTick(); btn.disabled = false; $("sample").disabled = false; currentCtrl = null; } });
+      .then(function(){ if(myRun === runId){ stopTick(); btn.disabled = false; $("sample").disabled = false; currentCtrl = null; trialActive = false; trialSessionToken = null; } });
   });
 
   /* ── コピー ── */

@@ -10,7 +10,7 @@ const crypto=require('node:crypto');
 const clone=x=>JSON.parse(JSON.stringify(x));
 const jp=/[ぁ-んァ-ン一-龯]/;
 const testExports='DEMO,FLAG_DEF,FLAG_LABEL,TYPE_LABEL,TYPE_BADGE,TYPE_HELP,cleanFlags,displayFlag,tagsHtml,render,renderDemoRecheck';
-function setup(fixtures=[],demo=false){
+function setup(fixtures=[],demo=false,options={}){
   const elements=new Map(),timers=new Map(),intervals=new Map(),requests=[],storage=new Map();
   let n=0,now=0,copied='';
   class TestDate extends Date{static now(){return now;}}
@@ -34,7 +34,7 @@ function setup(fixtures=[],demo=false){
     }
   });
   vm.runInContext((demo?demoSource:source).replace(/\}\)\(\);\s*$/,'globalThis.testApi={'+testExports+(demo?'':',CRITERIA,buildPrompt,buildRecheckPrompt,validateSegments')+'};})();'),context);
-  if(!demo){el('apikey').value='local-test-placeholder';el('question').value=snapshot.question;el('reply').value=snapshot.reply;}
+  if(!demo){el('trial-method').value=options.access||'gemini';el('apikey').value='local-test-placeholder';el('question').value=snapshot.question;el('reply').value=snapshot.reply;}
   return {el,timers,intervals,requests,storage,api:context.testApi,copy:()=>copied,
     advance(s){now+=s*1000;intervals.forEach(f=>f());},expire(){const entry=[...timers].find(([,v])=>v.delay===90000);assert.ok(entry);timers.delete(entry[0]);entry[1].f();}};
 }
@@ -131,5 +131,19 @@ function permutations(a){return a.length?a.flatMap((v,i)=>permutations(a.filter(
   const empty=setup();empty.el('apikey').value='';await empty.el('run').handlers.click();assert.equal(empty.requests.length,0);
   empty.storage.set('yomitoki_key','placeholder');empty.el('apikey').handlers.input.call(empty.el('apikey'));assert.equal(empty.storage.get('yomitoki_key'),'');
   checks.push('HTML is escaped, missing keys prevent requests, and clearing a key removes the stored value');
+  const okRes=v=>({response:{ok:true,status:200,json:async()=>v}});
+  const free=setup([okRes({remaining:3,sessionToken:'a'.repeat(64)}),clone(first),clone(clean),okRes({remaining:2})],false,{access:'free'});
+  free.el('apikey').value='';await free.el('run').handlers.click();
+  assert.deepEqual(free.requests.map(r=>r.url.replace(/^https:\/\/[^/]+/,'')),['/start','/generate','/generate','/finish']);
+  assert.ok(free.requests.every(r=>r.url.startsWith('https://yomitoki-free.takibilab.workers.dev/')));
+  assert.ok(free.requests.every(r=>!('x-goog-api-key' in r.options.headers)));
+  const startBody=JSON.parse(free.requests[0].options.body);assert.match(startBody.clientId,/^[a-f0-9]{32}$/);
+  const genBody=JSON.parse(free.requests[1].options.body);assert.equal(genBody.sessionToken,'a'.repeat(64));assert.equal(genBody.payload.generationConfig.responseMimeType,'application/json');
+  assert.equal(free.el('status').textContent,'Inspection complete. (Free: 2 left today)');
+  const limited=setup([{response:{ok:false,status:429,json:async()=>({error:{message:'今日の無料測定（1日3回）を使い切りました。',code:'daily_limit'}})}}],false,{access:'free'});
+  await limited.el('run').handlers.click();
+  assert.match(limited.el('status').textContent,/3 free inspections/);assert.match(limited.el('status').textContent,/own Gemini API key/);assert.equal(jp.test(limited.el('status').textContent),false);
+  for(const code of [400,403,404,429,500,503]){const x=setup([{http:code}]);await x.el('run').handlers.click();assert.equal(jp.test(x.el('status').textContent),false);assert.doesNotMatch(x.el('status').textContent,/Mock provider error/);}
+  checks.push('Free use (no key): start, two passes and finish go to the free server with a browser ID; the 3-per-day limit and all errors are shown in English');
   console.log(JSON.stringify({passed:checks.length,colorCombinations:combinations,failureCases,checks,liveApiCalled:false,limitation:'Mock API and minimal DOM; live English model behavior requires an actual API test.'},null,2));
 })().catch(e=>{console.error(e);process.exitCode=1;});
