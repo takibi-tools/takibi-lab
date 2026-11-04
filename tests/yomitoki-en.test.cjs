@@ -145,5 +145,15 @@ function permutations(a){return a.length?a.flatMap((v,i)=>permutations(a.filter(
   assert.match(limited.el('status').textContent,/3 free inspections/);assert.match(limited.el('status').textContent,/own Gemini API key/);assert.equal(jp.test(limited.el('status').textContent),false);
   for(const code of [400,403,404,429,500,503]){const x=setup([{http:code}]);await x.el('run').handlers.click();assert.equal(jp.test(x.el('status').textContent),false);assert.doesNotMatch(x.el('status').textContent,/Mock provider error/);}
   checks.push('Free use (no key): start, two passes and finish go to the free server with a browser ID; the 3-per-day limit and all errors are shown in English');
+  const g=setup([clone(first),clone(clean)]);g.el('mode-general').checked=true;g.el('mode-general').handlers.change();
+  assert.equal(g.el('reply-label').textContent,'Text to inspect');assert.equal(g.el('remeasured-title').textContent,'Re-measured text');
+  await g.el('run').handlers.click();assert.equal(g.el('status').textContent,'Inspection complete.');
+  const gp=g.requests.map(r=>JSON.parse(r.options.body).contents[0].parts[0].text);
+  assert.ok(gp[0].includes('【文章】')&&!gp[0].includes('【AIの返答】'));assert.ok(gp[0].includes('■ 物差し：汎用'));assert.ok(gp[1].includes('■ 物差し：汎用'));
+  assert.ok(gp[0].includes('natural English'));assert.match(g.el('result-mode').textContent,/any text/);
+  const aiPrompt=e.api.buildPrompt('Q','R');assert.ok(aiPrompt.includes('【AIの返答】'));assert.ok(!aiPrompt.includes('■ 物差し：汎用'));
+  const ge=setup();ge.el('mode-general').checked=true;ge.el('mode-general').handlers.change();ge.el('reply').value='';await ge.el('run').handlers.click();
+  assert.equal(ge.requests.length,0);assert.equal(ge.el('status').textContent,'Paste the text you want to inspect first.');
+  checks.push('Any text mode: labels switch, prompts use the general measuring stick in both passes with English output, AI reply prompts are unchanged');
   console.log(JSON.stringify({passed:checks.length,colorCombinations:combinations,failureCases,checks,liveApiCalled:false,limitation:'Mock API and minimal DOM; live English model behavior requires an actual API test.'},null,2));
 })().catch(e=>{console.error(e);process.exitCode=1;});
