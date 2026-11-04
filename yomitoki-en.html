@@ -609,7 +609,16 @@ CRITERIA,
   }
 
   /* ── Any text: same criteria, measured without assuming the writer is an AI ── */
+  // The instructions are in Japanese (shared with the Japanese edition), so the model tends to answer in Japanese.
+  // End every prompt with an explicit English-only reminder for the human-readable fields.
+  var ENGLISH_REMINDER = "FINAL REQUIREMENT: Every summary, note and remeasured value must be written in natural English, even though the instructions above are in Japanese. Do not write any Japanese in summary, note or remeasured. Keep the Japanese machine keys for type, flags and primary exactly as specified.";
   function buildPrompt(question, reply, mode){
+    return buildPromptBody(question, reply, mode) + "\n\n" + ENGLISH_REMINDER;
+  }
+  function buildRecheckPrompt(question, reply, result, mode){
+    return buildRecheckPromptBody(question, reply, result, mode) + "\n\n" + ENGLISH_REMINDER;
+  }
+  function buildPromptBody(question, reply, mode){
     if(mode !== "general") return buildPromptAI(question, reply);
     return [
 "あなたは「よみとき」という、文章を校正する検品者です。点数はつけません。",
@@ -644,7 +653,7 @@ REMEASURE_RULES_GENERAL,
     ].join("\n");
   }
 
-  function buildRecheckPrompt(question, reply, result, mode){
+  function buildRecheckPromptBody(question, reply, result, mode){
     if(mode !== "general") return buildRecheckPromptAI(question, reply, result);
     return [
 "あなたは「よみとき」という、文章を校正する検品者です。点数はつけません。",
@@ -851,7 +860,7 @@ MODE_RULES_GENERAL,
     if(!items.length){
       html += '<span class="rc-ok">No issues were found in this second inspection.</span>';
     } else {
-      html += 'The revised reply still has issues. Review the passages below before using it.' + items.join("");
+      html += 'The revised ' + (activeMode === "general" ? "text" : "reply") + ' still has issues. Review the passages below before using it.' + items.join("");
     }
     $("recheck").innerHTML = html;
   }
