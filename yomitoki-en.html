@@ -190,6 +190,7 @@
   .summary{font-family:var(--display);font-size:14px;color:var(--ink-soft);border-left:3px solid var(--ink);padding:2px 0 2px 14px;margin-bottom:20px;letter-spacing:.03em}
   .summary:empty{display:none}
   .result-note{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+  .rc-repair{font-size:12px;color:var(--ink-soft);margin-top:10px}
 
   footer{margin-top:56px;font-size:12.5px;color:var(--ink-soft);line-height:1.9;letter-spacing:.03em}
   footer .lab-seal{display:inline-flex;flex-direction:column;align-items:center;gap:6px;margin-top:16px;font-size:11px;letter-spacing:.22em;color:var(--ink-soft);text-decoration:none}
@@ -681,9 +682,77 @@ MODE_RULES_GENERAL,
     ].join("\n");
   }
 
+  /* ── Rewrite check (deterministic, same idea as the Japanese edition) ──
+     Do not rely on the model’s own word. Compare the revision with the findings, and if it
+     breaks a rule that can be checked mechanically, ask for one more rewrite of just those points. */
+  function wsStrip(t){ return String(t || "").replace(/\s+/g, "").toLowerCase(); }
+  function checkRewriteIntegrity(result, mode){
+    var problems = [];
+    var remeasured = wsStrip(result && result.remeasured);
+    if(!remeasured) return problems;
+    (result.segments || []).forEach(function(seg){
+      var flags = cleanFlags(seg);
+      var text = wsStrip(seg.text);
+      if(!text) return;
+      if(!flags.length){
+        // Any text keeps unflagged passages word for word. (AI reply may rephrase them.)
+        if(mode === "general" && remeasured.indexOf(text) < 0){
+          problems.push("フラグのないセグメントが原文のまま残っていません：「" + String(seg.text).trim() + "」は一字も変えずに再掲してください");
+        }
+      } else {
+        var phrase = wsStrip(seg.phrase);
+        if(phrase && phrase.length >= 8 && remeasured.indexOf(phrase) >= 0){
+          problems.push("フラグの核の語句が元の形で残っています：「" + String(seg.phrase).trim() + "」（" + flags.join("・") + "）。削るか、根拠の届く範囲へ言い換えてください");
+        }
+      }
+    });
+    // Softening an unsourced claim into a vague attribution keeps the same claim. Catch it when the
+    // revision adds such wording that the original did not have.
+    var cited = (result.segments || []).some(function(seg){ return cleanFlags(seg).indexOf("出どころなき引用") >= 0; });
+    if(cited){
+      var WEASEL = /\b(some (research|studies|studies have|experts|engineers|companies|people|reports)|research suggests|studies suggest|reportedly|it is said|it has been said|many (experts|people|engineers) (say|believe|feel)|according to some)\b/gi;
+      var before = String(result.__original || "").toLowerCase();
+      var added = (String(result.remeasured).match(WEASEL) || []).filter(function(w){ return before.indexOf(w.toLowerCase()) < 0; });
+      if(added.length){
+        problems.push("出典を示せない主張を、ぼかした言い方で残しています：「" + added.slice(0, 3).join("」「") + "」。出典を示せないなら、その主張ごと削ってください");
+      }
+    }
+    return problems.slice(0, 8);
+  }
+  function buildRepairPrompt(question, reply, result, problems, mode){
+    var general = mode === "general";
+    var target = general ? "文章" : "AIの返答";
+    var flagged = result.segments.filter(function(seg){ return cleanFlags(seg).length; });
+    return [
+"あなたは「よみとき」という、文章を校正する検品者です。点数はつけません。",
+"一度作った「測り直した" + (general ? "文章" : "返答") + "」に、以下の不備が見つかりました。不備だけを直した全文を作り直してください。",
+"",
+"■ 見つかった不備",
+problems.map(function(p){ return "・" + p; }).join("\n"),
+"",
+"■ 直し方の規則",
+"・不備として挙げられた点だけを直す。それ以外の部分は、現在の測り直した" + (general ? "文章" : "返答") + "をそのまま使う",
+(general ? "・検出フラグを付けなかったセグメントは、元の文章から一字も変えずに含める\n" + REMEASURE_RULES_GENERAL
+         : "・AIが語った体験・人間関係・自分の行動は作り話として削る。根拠なき断定・過剰肯定は語尾を弱めて残さず、削るか確認の質問にする"),
+"・出典を示せない「研究によると」「専門家も」などを、「一部の研究では」「〜という人もいる」に言い換えて残さない。示せないなら削る",
+"・文体は元の文章に合わせ、自然な英語で書く",
+"",
+"■ 出力形式",
+"次のJSONのみを出力すること。前置き・後書き・コードフェンスは禁止。",
+'{"remeasured":"直し直した全文"}',
+"",
+(question ? "【元の質問・文脈】\n" + question + "\n\n" : ""),
+"【元の" + target + "】\n" + reply,
+"【最初の検品でフラグが付いたセグメント】\n" + JSON.stringify(flagged),
+"【現在の測り直した" + (general ? "文章" : "返答") + "】\n" + result.remeasured,
+"",
+ENGLISH_REMINDER
+    ].join("\n");
+  }
+
   /* ── Gemini API ── */
   var TIMEOUT_MS = 90000;
-  function callGemini(key, model, prompt, ctrl){
+  function callGemini(key, model, prompt, ctrl, expect){
     var url = trialActive ? (TRIAL_ENDPOINT + "/generate")
       : ("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent");
     var payload = {
@@ -723,6 +792,10 @@ MODE_RULES_GENERAL,
       var parsed;
       try{ parsed = JSON.parse(text); }
       catch(e){ throw new Error("Could not read the result format. Please try again."); }
+      if(expect === "remeasured"){
+        if(!parsed || typeof parsed.remeasured !== "string" || !parsed.remeasured.trim()) throw new Error("The result format was not as expected. Please try again.");
+        return parsed;
+      }
       if(!parsed || !Array.isArray(parsed.segments)){
         throw new Error("The result format was not as expected. Please try again.");
       }
@@ -922,16 +995,31 @@ MODE_RULES_GENERAL,
         if(myRun !== runId) return;
         validateSegments(result, reply);
         if(typeof result.remeasured !== "string" || !result.remeasured.trim()){ throw new Error("The result format was not as expected. Please try again."); }
+        var repaired = false;
+        result.__original = reply;
+        var integrity = checkRewriteIntegrity(result, mode);
+        var fix = Promise.resolve();
+        if(integrity.length){
+          startTick("Fixing the revision…");
+          fix = callGemini(key, model, buildRepairPrompt(question, reply, result, integrity, mode), currentCtrl, "remeasured")
+            .then(function(fixed){ if(myRun !== runId) return; result.remeasured = fixed.remeasured.trim(); repaired = true; })
+            .catch(function(err){ if(err && err.trialLimit) throw err; /* keep the first revision */ });
+        }
+        return fix.then(function(){
+        if(myRun !== runId) return;
         startTick("Running the second inspection…");
         render(result, false, question.length > 0);
         $("result-mode").textContent = MODE_TEXT[mode].resultMode;
+        var repairNote = function(){ if(repaired) $("recheck").innerHTML += '<div class="rc-repair">The first revision did not follow the rewriting rules, so it was rewritten once more.</div>'; };
         return callGemini(key, model, buildRecheckPrompt(question, reply, result, mode), currentCtrl)
-          .then(function(check){ if(myRun !== runId) return; validateSegments(check, result.remeasured); renderRecheck(check); })
+          .then(function(check){ if(myRun !== runId) return; validateSegments(check, result.remeasured); renderRecheck(check); repairNote(); })
           .catch(function(err){
             if(myRun !== runId) return;
             $("recheck").innerHTML = '<div class="rc-head">Second inspection</div>Second inspection incomplete. Review the revised reply yourself before using it.';
+            repairNote();
             throw err;
           });
+        });
       })
       .then(function(){
         if(isTrial && myRun === runId) return trialRequest("/finish", { sessionToken: trialSessionToken }, currentCtrl)
