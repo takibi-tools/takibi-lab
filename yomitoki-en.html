@@ -46,6 +46,15 @@
   .rule{border:none;border-top:1px solid var(--rule);margin:28px 0}
 
   /* サンプル入口 */
+  fieldset.mode{border:none;margin:0 0 22px;padding:0}
+  .mode-lead{font-size:13px;color:var(--ink);line-height:1.7;margin-bottom:10px;padding:0}
+  .mode-switch{display:flex;width:100%;gap:4px;padding:4px;border:1px solid var(--rule);border-radius:8px;background:#F0EFEB}
+  .mode-switch label{position:relative;cursor:pointer;flex:1;min-width:0}
+  .mode-switch input{position:absolute;opacity:0;width:1px;height:1px}
+  .mode-switch span{display:block;padding:11px 8px;text-align:center;font-family:var(--body);font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft);border-radius:5px}
+  .mode-switch input:checked + span{background:var(--ink);color:var(--paper)}
+  .mode-switch input:focus-visible + span{outline:2px solid var(--shu);outline-offset:-3px}
+  .mode-help{font-size:12px;color:var(--ink-soft);line-height:1.7;margin-top:12px}
   .sample-row{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
   button.sample{
     font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:.14em;
@@ -201,8 +210,17 @@
   <header>
     <p class="lab">TAKIBI lab</p>
     <h1>Yomitoki</h1>
-    <p class="tagline">Re-measure what the AI told you.</p>
+    <p class="tagline" id="mode-tagline">Re-measure what the AI told you.</p>
   </header>
+
+  <fieldset class="mode" id="mode-selector">
+    <legend class="mode-lead">Use “AI reply” for answers you got from an AI yourself, and “Any text” for everything else.</legend>
+    <div class="mode-switch">
+      <label><input type="radio" name="mode" id="mode-ai" value="ai" checked><span>AI reply</span></label>
+      <label><input type="radio" name="mode" id="mode-general" value="general"><span>Any text</span></label>
+    </div>
+    <p class="mode-help" id="mode-help" aria-live="polite">Checks for an AI’s made-up personal stories and relationships, unsupported assertions, and excessive agreement.</p>
+  </fieldset>
 
   <div class="sample-row">
     <button class="sample" id="sample" type="button">View sample</button>
@@ -236,10 +254,10 @@
   </div>
 
   <div class="input-block">
-    <label for="reply">AI reply <span class="count" id="count">0 / 4000</span></label>
+    <label for="reply"><span id="reply-label">AI reply</span> <span class="count" id="count">0 / 4000</span></label>
     <textarea id="reply" maxlength="4000" placeholder="Paste the AI reply you want to inspect."></textarea>
   </div>
-  <p class="send-note">Selecting “Re-measure” sends your question, the AI reply, and the proposed revision to Google’s API for analysis. Viewing the sample makes no API call.</p>
+  <p class="send-note">Selecting “Re-measure” sends your question or context, the text, and the proposed revision to Google’s API for analysis. Viewing the sample makes no API call.</p>
 
   <div class="run-row">
     <button class="run" id="run" type="button">Re-measure</button>
@@ -252,6 +270,7 @@
 
     <p class="context-note" id="context-note" hidden></p>
     <p class="summary" id="summary"></p>
+    <p class="result-note" id="result-mode"></p>
     <p class="result-note" id="result-note">Inspection results are an AI assessment.</p>
 
     <div class="legend" aria-hidden="true">
@@ -270,7 +289,7 @@
     </section>
 
     <section class="panel remeasured">
-      <h2 class="panel-title">Re-measured reply</h2>
+      <h2 class="panel-title" id="remeasured-title">Re-measured reply</h2>
       <div class="remeasured-text" id="remeasured"></div>
       <div class="copy-row">
         <button class="copy" id="copy" type="button">Copy reply</button>
@@ -299,6 +318,68 @@
 
   $("apikey").value = recall("yomitoki_key");
   var MODEL = "gemini-2.5-flash";
+
+
+  /* ── Measuring stick: AI reply / Any text (writer may be a person or an AI) ──
+     Prompt instructions stay in Japanese, shared with the Japanese edition. */
+  var MODE_TEXT = {
+    ai:{
+      tagline:"Re-measure what the AI told you.",
+      help:"Checks for an AI’s made-up personal stories and relationships, unsupported assertions, and excessive agreement.",
+      contextHelp:"If you have the original question or relevant conversation, include it here. Otherwise, only the response itself will be inspected.",
+      contextPlaceholder:"Paste the question you sent to the AI or relevant parts of the conversation. You do not need to include the entire conversation.",
+      label:"AI reply", placeholder:"Paste the AI reply you want to inspect.", empty:"Paste an AI reply first.",
+      title:"Re-measured reply", copy:"Copy reply",
+      resultMode:"Inspected as an AI reply. If a person wrote this, or you are not sure who wrote it, re-measure it as “Any text.”"
+    },
+    general:{
+      tagline:"Re-measure the words you read.",
+      help:"For text when you don’t know whether a person or an AI wrote it. The writer’s own experiences are not faulted; leaps and sweeping claims beyond them are checked.",
+      contextHelp:"If there is a post, conversation or background this text responds to, include it here. Otherwise, only the text itself will be inspected.",
+      contextPlaceholder:"Paste the original post, the surrounding conversation, or other background for this text.",
+      label:"Text to inspect", placeholder:"Paste the text you want to inspect.", empty:"Paste the text you want to inspect first.",
+      title:"Re-measured text", copy:"Copy text",
+      resultMode:"Inspected as any text, without assuming whether a person or an AI wrote it. If you know an AI wrote it, re-measure it as “AI reply.”"
+    }
+  };
+  var MODE_RULES_GENERAL = [
+
+"■ 物差し：汎用（書き手が人かAIかは分からない）",
+"検品対象は【文章】である。書き手が人間かAIかを推測して判定を変えない。以下の基準や指示に出てくる「AI」「AIの返答」は、この文章の書き手・この文章と読み替える。「相手」は、文章が向けられた人（元の質問・文脈があればその書き手）と読む。",
+"・書き手の体験（区分は事実）：書き手が一人称で語る、自分の体験・見聞・身近な人の話・自分が受け取った反応（「私の友人は〜」「〜と言われた」「〜を見た」「〜な人が多いようで（届いた反応を見て知ったこと）」等）。外で起きた出来事を見聞きした報告に限り、書き手自身の気持ち・感情・不安・願望は体験に含めず意見とする。区分は事実とする（「体験」という区分は使わない）。外から確かめられないことだけを理由に根拠なき断定にしない。体験の中の人数・期間・数字も体験の一部として扱う。",
+"・書き手が自分の気持ちを表明しただけの文（「それを見て、私も再就職について不安を感じています」等）は、区分を意見とし、それだけで検出フラグを付けない。「感じる」「思う」の語尾で区分を決めず、自分の内面の表明か、世の中についての判断かで分ける。「再就職は必ず難しいと思う」は世の中についての判断なので、根拠と範囲を検品する。",
+"・体験の範囲を越えた部分は節を分けて検品する。体験から全体・世間・業界への一般化（「〜な人がたくさんいる」「みんな〜」）、他人の判断の理由・内心・意図の言い切り（「断られた理由は〜だから」）、伝聞を確かめた事実のように書くこと（「〜らしい」で聞いた話を全体の実態として扱う）は、根拠なき断定などのフラグを付ける。",
+"・体験と、他人の判断の理由の言い切りが一つの文に入っている場合（「紹介したが、どこも断られた理由は、職歴がないから」等）は、必ず節を分け、体験の節は事実、言い切りの節は別に検品する。「〜と言われた」「〜と聞いた」など、本人が聞いたことを示す言葉がなければ、聞いた話だろうと補って体験に含めない。書かれていない事情を好意的に補わない。",
+"・「AIが個人的な経験を語っている」「AIには友人がいない」など、書き手をAIと決めつけた指摘はしない。",
+"・広く確認されている一般的な傾向は、出典が書かれていないことだけで根拠なき断定にしない。区分は内容に応じて事実・推測とする。",
+"・体験に基づく推測や意見で、書き手が自分の根拠（「身近な例から」「私の経験では」等）と、その限界（「どこまで当てはまるかは分からない」「一般的な傾向だとまでは言えない」「当てはまらない場合もある」等）を自分で書いているものは、根拠なき断定にしない。根拠や範囲を示さずに語尾だけを弱めたもの（「〜かもしれない」「〜可能性もある」「〜と思う」）は、これまで通り根拠不足として扱う。「可能性もある」「と考えている」と控えめに書いてあることは、範囲を示したことにならない。たとえば「近所の店が二軒つぶれた。そのため、この町の商店街は衰退していく可能性もあると思う」は、身近な例から町全体を語っていて、その例がどこまで当てはまるかを書いていないので根拠なき断定とする。「不確実性を含んだ推測だから問題なし」として通さない。指摘の理由を書くときは、語尾の強弱ではなく、根拠と範囲が示されているかで説明する。"
+  ].join("\n");
+  var REMEASURE_RULES_GENERAL = [
+
+"・校正の優先順位を厳密に守る。第一に、検出フラグを付けたセグメントを根拠の届く範囲へ縮める。第二に、検出フラグを付けなかったセグメントは一字も変えず、そのまま再掲する。第三に、それ以外の文体の改善・言い換え・追加は一切しない",
+"・文の種類と発話目的を保つ。質問は質問のまま、反論・異議・問いかけはその形のまま、主張の射程だけを縮める。質問や反論を、中立な推測や感想の文に置き換えない",
+"・書き手の体験の語り（一人称・人物・人数・期間）を消さない。文体と主張の方向を残し、誰の話でもない一般論に置き換えない",
+"・元の発話の目的（主張・意見・注意喚起・説明・質問）を保つ。元が意見・主張なのに、根拠不足を避けるためだけに『〜なのでしょうか？』等の質問へ置き換えることは禁止。勝手に反対意見や中立的結論に差し替えない",
+"・体験から一般的な因果や必然性を断定した箇所は、根拠の届く範囲へ限定する。観察・本人の見解・一般化の限界を区別し、限界は必ず一文で書き添える（例：『そうした例を見て、私は〜ではないかと考えています。ただし、これは身近な例から考えていることで、ほかの人にもどこまで当てはまるかは分かりません』）。限界の一文は、書き手の根拠と、書き手が知っている範囲の説明だけにする。「一般的な傾向ではない」「一般的とまでは言えない」のように、世の中の傾向を否定も肯定もしない。よみときは外の出典を調べていないため、その主張が世の中で正しいかどうかには触れない。『と思います』『かもしれません』『可能性もある』と語尾だけ弱める修正では足りない",
+"・手を入れるのは指摘した部分だけにする。他人の理由や内心の言い切りは、本人から聞いた話なのか推測なのかが分かる形にする。原文にない不安・感情・事実・出典・因果を付け足さない",
+"・他人の理由や内心の言い切りを直すとき、「〜と言われた」「理由として挙げられた」など、本人が聞いたことにする書き方をしない。聞いたかどうかは原文から分からないため、推測であることと、その推測の根拠の範囲が分かる形にする（例：「理由をはっきり聞いたわけではありませんが、職歴がないことが大きかったのではないかと考えています」）。「〜と考えています」「〜のようでした」と語尾だけを変える形は、根拠と範囲を示していないため二周目で再び指摘される。語尾だけで済ませない",
+"・検出フラグを付けなかったセグメントは一字も変えない。そこに限界の一文や控えめな言い方を足さない。検出フラグが一つもなければ、測り直した文章は原文と同じにする。広く確認されている一般的な傾向を、書き手個人の推測に格下げしない",
+"・『指摘が消えればよい』として主張を丸ごと削らない。根拠が足りず主張をそのまま残せない場合も、書き手が何を経験し何を考えたかを、裏付けの範囲を明示してできるだけ保つ"
+  ].join("\n");
+  function currentMode(){ return $("mode-general").checked ? "general" : "ai"; }
+  var activeMode = "ai";
+  function applyModeText(){
+    var t = MODE_TEXT[currentMode()];
+    $("mode-tagline").textContent = t.tagline;
+    $("mode-help").textContent = t.help;
+    $("question-help").textContent = t.contextHelp;
+    $("question").setAttribute("placeholder", t.contextPlaceholder);
+    $("reply-label").textContent = t.label;
+    $("reply").setAttribute("placeholder", t.placeholder);
+    $("remeasured-title").textContent = t.title;
+    $("copy").textContent = t.copy;
+    try{ document.title = "Yomitoki — " + t.tagline; }catch(e){}
+  }
 
   /* ── Free use (no key, 3 per day) ──
      Yomitoki’s server holds the API key. Never put a key in this page. */
@@ -469,7 +550,7 @@
   ].join("\n");
 
   /* ── 解析プロンプト（検品＋測り直し） ── */
-  function buildPrompt(question, reply){
+  function buildPromptAI(question, reply){
     return [
 "あなたは「よみとき」という、AIの返答を校正する検品者です。点数はつけません。",
 "以下の【AIの返答】を文・節ごとの区切り（セグメント）に分け、各セグメントを次の基準で評価してください。",
@@ -503,7 +584,7 @@ CRITERIA,
   }
 
   /* ── 二周目：元の指摘と照合して測り直した返答を検品する ── */
-  function buildRecheckPrompt(question, reply, result){
+  function buildRecheckPromptAI(question, reply, result){
     return [
 "あなたは「よみとき」という、AIの返答を校正する検品者です。点数はつけません。",
 "以下は一度校正された返答です。校正が本当に効いているかを確かめるため、同じ基準でもう一度だけ検品してください。書き直しはしません。",
@@ -524,6 +605,79 @@ CRITERIA,
 "【元のAIの返答（比較用）】\n" + reply,
 "【最初の指摘（比較用）】\n" + JSON.stringify(result.segments.filter(function(seg){ return cleanFlags(seg).length; })),
 "【校正された返答】\n" + result.remeasured
+    ].join("\n");
+  }
+
+  /* ── Any text: same criteria, measured without assuming the writer is an AI ── */
+  // The instructions are in Japanese (shared with the Japanese edition), so the model tends to answer in Japanese.
+  // End every prompt with an explicit English-only reminder for the human-readable fields.
+  var ENGLISH_REMINDER = "FINAL REQUIREMENT: Every summary, note and remeasured value must be written in natural English, even though the instructions above are in Japanese. Do not write any Japanese in summary, note or remeasured. Keep the Japanese machine keys for type, flags and primary exactly as specified.";
+  function buildPrompt(question, reply, mode){
+    return buildPromptBody(question, reply, mode) + "\n\n" + ENGLISH_REMINDER;
+  }
+  function buildRecheckPrompt(question, reply, result, mode){
+    return buildRecheckPromptBody(question, reply, result, mode) + "\n\n" + ENGLISH_REMINDER;
+  }
+  function buildPromptBody(question, reply, mode){
+    if(mode !== "general") return buildPromptAI(question, reply);
+    return [
+"あなたは「よみとき」という、文章を校正する検品者です。点数はつけません。",
+"以下の【文章】を文・節ごとの区切り（セグメント）に分け、各セグメントを次の基準で評価してください。",
+"",
+CRITERIA,
+"Language and response keys: write summary, note, and remeasured in natural English. Preserve the original wording in text and phrase. The Japanese values specified for type, flags, and primary are fixed machine keys shared with the Japanese edition: keep them exactly as written, without translating them. Their English display labels are "+ JSON.stringify({types:TYPE_LABEL,flags:FLAG_LABEL}),
+"",
+MODE_RULES_GENERAL,
+"",
+"■ 測り直した文章",
+"元の文章の有用な中身と発話の目的を保ちつつ、次の校正を施した全文を書いてください。",
+"・根拠なき断定・過剰肯定は事実と意見を区別し、裏付けられる範囲まで主張を限定する。出典や条件を捏造せず、単に『と思います』などの語尾に変えるだけで済ませない。書き手の意見・主張を質問へ置き換えない",
+"・入力に書かれていない経歴・成果・能力・価値への評価は、本人へのものでも職業や組織へのものでも、根拠がないものとして削る",
+"・相手の言葉や前提をそのまま繰り返すだけの同意は削る。感情の受け止めは短く残してよい",
+"・入力に書かれた感情や経験はそのまま受け止める。入力にない痛み・疲労・後悔は補わない。",
+"・過剰な未来予測 → 不確実性が伝わる表現にする",
+"・出どころなき引用 → 出典を示せないなら権威の借用をやめる。内容自体にも根拠がなければ削除し、推論への言い換えだけで残さない",
+REMEASURE_RULES_GENERAL,
+"・簡潔さは保つが、書き手の意図と限定条件を示すため必要なら原文より長くなってよい。短くするための体験や主張の削除はしない",
+"・文体は元の文章に合わせ、測り直した文章は自然な英語で書く",
+"・出力する前に、検品で拾った問題が別の言い回しで残っていないかを自分で確かめ、残っていれば書き直す。あわせて、検出フラグを付けなかったセグメントが原文のまま残っているか、質問や反論が別の文の種類に置き換わっていないかも確かめ、違っていれば直す",
+"",
+"■ 出力形式",
+"次のJSONのみを出力すること。前置き・後書き・コードフェンスは禁止。",
+'{"segments":[{"text":"セグメント原文そのまま","type":"事実|推論|意見|励まし|問い","flags":["根拠なき断定"等、なければ空配列],"primary":"flagsが複数あるとき、その文の中心となる問題を一つ。flagsのいずれかと同じ文字列。flagsが空なら空文字","phrase":"フラグがある場合、問題の核になる語句をセグメント原文から抜き出す。なければ空文字","note":"フラグがある場合のみ、何が問題かを一文で"}],"summary":"文章全体の所見を一〜二文で。点数や等級は使わない","remeasured":"測り直した文章の全文"}',
+"",
+"segmentsのtextを順に連結すると元の文章が(改行や空白の差を除き)復元できるようにすること。",
+"",
+(question ? "【元の質問・文脈】\n" + question + "\n\n" : ""),
+"【文章】\n" + reply
+    ].join("\n");
+  }
+
+  function buildRecheckPromptBody(question, reply, result, mode){
+    if(mode !== "general") return buildRecheckPromptAI(question, reply, result);
+    return [
+"あなたは「よみとき」という、文章を校正する検品者です。点数はつけません。",
+"以下は一度校正された文章です。校正が本当に効いているかを確かめるため、同じ基準でもう一度だけ検品してください。書き直しはしません。",
+"",
+CRITERIA,
+"Language and response keys: write summary, note, and remeasured in natural English. Preserve the original wording in text and phrase. The Japanese values specified for type, flags, and primary are fixed machine keys shared with the Japanese edition: keep them exactly as written, without translating them. Their English display labels are "+ JSON.stringify({types:TYPE_LABEL,flags:FLAG_LABEL}),
+"",
+MODE_RULES_GENERAL,
+"書き手の体験の語りが残っていること自体は問題にしない。体験を越えた一般化や他人の理由の言い切りが残っていないかを見る。",
+"",
+"最初の指摘と校正された文章を意味で照合し、別表現・弱い語尾・質問の前提として問題が残っていないか確認する。最初の指摘以外の問題も検品する。",
+"最初に指摘した同意や世評が、弱い語尾・別の褒め言葉・世間の評価の形で残っていれば同じフラグを付ける。問題が残る文を指摘なしとして通さない。相手が引用した言葉や、評価への異議だけを残存問題とは扱わない。",
+"元の文章と最初の指摘は比較資料であり、経歴・成果・能力の裏付けではない。根拠が不足した評価が残っていればフラグを付ける。",
+"segmentsには校正された文章の全文を改行・空白以外の省略なく含め、問題がなくても空配列にしない。",
+"",
+"■ 出力形式",
+"次のJSONのみを出力すること。前置き・後書き・コードフェンスは禁止。",
+'{"segments":[{"text":"セグメント原文そのまま","type":"事実|推論|意見|励まし|問い","flags":["根拠なき断定"等、なければ空配列],"primary":"flagsが複数あるとき、その文の中心となる問題を一つ。flagsが空なら空文字","phrase":"フラグがある場合、問題の核になる語句","note":"フラグがある場合のみ、何が問題かを一文で"}]}',
+"",
+(question ? "【元の質問・文脈】\n" + question + "\n\n" : ""),
+"【元の文章（比較用）】\n" + reply,
+"【最初の指摘（比較用）】\n" + JSON.stringify(result.segments.filter(function(seg){ return cleanFlags(seg).length; })),
+"【校正された文章】\n" + result.remeasured
     ].join("\n");
   }
 
@@ -706,7 +860,7 @@ CRITERIA,
     if(!items.length){
       html += '<span class="rc-ok">No issues were found in this second inspection.</span>';
     } else {
-      html += 'The revised reply still has issues. Review the passages below before using it.' + items.join("");
+      html += 'The revised ' + (activeMode === "general" ? "text" : "reply") + ' still has issues. Review the passages below before using it.' + items.join("");
     }
     $("recheck").innerHTML = html;
   }
@@ -729,6 +883,7 @@ CRITERIA,
   $("run").addEventListener("click", function(){
     if($("run").disabled) return;
     var isTrial = accessMode() === "free";
+    var mode = currentMode();
     var key   = $("apikey").value.trim();
     var model = MODEL;
     var question = $("question").value.trim();
@@ -737,7 +892,7 @@ CRITERIA,
 
     status.classList.remove("error");
     if(!isTrial && !key){ status.textContent = "Enter your Gemini API key. If you don’t have one, choose “Free” under How to use in the settings."; status.classList.add("error"); $("config").open = true; $("apikey").focus(); return; }
-    if(!reply){ status.textContent = "Paste an AI reply first."; status.classList.add("error"); return; }
+    if(!reply){ status.textContent = MODE_TEXT[mode].empty; status.classList.add("error"); return; }
 
     if(!isTrial) store("yomitoki_key", key);
     trialActive = isTrial;
@@ -759,9 +914,9 @@ CRITERIA,
       ? trialRequest("/start", { clientId: clientId() }, currentCtrl).then(function(v){
           if(myRun !== runId) throw new Error("The inspection was stopped.");
           trialSessionToken = v.sessionToken;
-          return callGemini(key, model, buildPrompt(question, reply), currentCtrl);
+          return callGemini(key, model, buildPrompt(question, reply, mode), currentCtrl);
         })
-      : callGemini(key, model, buildPrompt(question, reply), currentCtrl);
+      : callGemini(key, model, buildPrompt(question, reply, mode), currentCtrl);
     return firstPass
       .then(function(result){
         if(myRun !== runId) return;
@@ -769,7 +924,8 @@ CRITERIA,
         if(typeof result.remeasured !== "string" || !result.remeasured.trim()){ throw new Error("The result format was not as expected. Please try again."); }
         startTick("Running the second inspection…");
         render(result, false, question.length > 0);
-        return callGemini(key, model, buildRecheckPrompt(question, reply, result), currentCtrl)
+        $("result-mode").textContent = MODE_TEXT[mode].resultMode;
+        return callGemini(key, model, buildRecheckPrompt(question, reply, result, mode), currentCtrl)
           .then(function(check){ if(myRun !== runId) return; validateSegments(check, result.remeasured); renderRecheck(check); })
           .catch(function(err){
             if(myRun !== runId) return;
@@ -896,6 +1052,29 @@ CRITERIA,
   }
 
   var sampleInputBackup = null;
+  function changeMode(){
+    var next = currentMode();
+    if(next !== activeMode){
+      // Keep the input; clear only results measured with the other stick.
+      if(sampleInputBackup){
+        $("question").value = sampleInputBackup.question;
+        $("reply").value = sampleInputBackup.reply;
+        sampleInputBackup = null;
+        $("sample").textContent = "View sample";
+      }
+      activeMode = next;
+      updateCount();
+      $("result").classList.remove("show");
+      $("status").textContent = "";
+      $("status").classList.remove("error");
+      setContextNote(false);
+    }
+    applyModeText();
+  }
+  $("mode-ai").addEventListener("change", changeMode);
+  $("mode-general").addEventListener("change", changeMode);
+  activeMode = currentMode();
+  applyModeText();
   $("sample").addEventListener("click", function(){
     if($("sample").disabled) return;
     runId++;
@@ -905,6 +1084,7 @@ CRITERIA,
     if(sampleInputBackup){
       $("question").value = sampleInputBackup.question;
       $("reply").value = sampleInputBackup.reply;
+      if(sampleInputBackup.mode === "general"){ $("mode-general").checked = true; $("mode-ai").checked = false; activeMode = "general"; applyModeText(); }
       sampleInputBackup = null;
       $("sample").textContent = "View sample";
       $("result").classList.remove("show");
@@ -914,7 +1094,10 @@ CRITERIA,
       updateCount();
       return;
     }
-    sampleInputBackup = { question: $("question").value, reply: $("reply").value };
+    sampleInputBackup = { question: $("question").value, reply: $("reply").value, mode: currentMode() };
+    // The sample is an AI reply.
+    $("mode-ai").checked = true; $("mode-general").checked = false; activeMode = "ai"; applyModeText();
+    $("result-mode").textContent = "";
     $("sample").textContent = "Back to my text";
     $("question").value = DEMO.question;
     $("reply").value = DEMO.reply;
