@@ -155,5 +155,19 @@ function permutations(a){return a.length?a.flatMap((v,i)=>permutations(a.filter(
   const ge=setup();ge.el('mode-general').checked=true;ge.el('mode-general').handlers.change();ge.el('reply').value='';await ge.el('run').handlers.click();
   assert.equal(ge.requests.length,0);assert.equal(ge.el('status').textContent,'Paste the text you want to inspect first.');
   checks.push('Any text mode: labels switch, prompts use the general measuring stick in both passes with English output, AI reply prompts are unchanged');
+  // Rewrite check: a flagged phrase left as-is, or an unsourced claim softened into "some research", triggers one rewrite.
+  const seg2=(text,type,flags,phrase)=>({text,type,flags,primary:flags[0]||'',phrase,note:flags.length?'n':''});
+  const bad={segments:[seg2('Studies show 90% of people are happier.','事実',['出どころなき引用'],'Studies show 90% of people are happier'),seg2('Take care.','励まし',[],'')],summary:'s',remeasured:'Some research suggests people may be happier. Take care.'};
+  const r1=setup([clone(bad),{remeasured:'Take care.'},{segments:[seg2('Take care.','励まし',[],'')]}]);r1.el('reply').value='Studies show 90% of people are happier. Take care.';await r1.el('run').handlers.click();
+  assert.equal(r1.requests.length,3);const rp=JSON.parse(r1.requests[1].options.body).contents[0].parts[0].text;
+  assert.ok(rp.includes('some research')||rp.includes('Some research'));assert.ok(rp.includes('FINAL REQUIREMENT'));
+  assert.equal(r1.el('remeasured').textContent,'Take care.');assert.match(r1.el('recheck').innerHTML,/rewritten once more/);assert.equal(r1.el('status').textContent,'Inspection complete.');
+  const left={segments:[seg2('You will definitely succeed.','推論',['過剰な未来予測'],'definitely succeed')],summary:'s',remeasured:'You will definitely succeed.'};
+  const r2=setup([clone(left),{http:503},{segments:[seg2('You will definitely succeed.','推論',[],'')]}]);r2.el('reply').value='You will definitely succeed.';await r2.el('run').handlers.click();
+  assert.equal(r2.requests.length,3);assert.equal(r2.el('remeasured').textContent,'You will definitely succeed.');assert.doesNotMatch(r2.el('recheck').innerHTML,/rewritten once more/);
+  const g2=setup([{segments:[seg2('I saw it.','事実',[],''),seg2('Everyone agrees.','推論',['根拠なき断定'],'Everyone agrees')],summary:'s',remeasured:'I think some agree.'},{remeasured:'I saw it. I think some agree.'},{segments:[seg2('I saw it.','事実',[],''),seg2('I think some agree.','意見',[],'')]}]);
+  g2.el('mode-general').checked=true;g2.el('mode-general').handlers.change();g2.el('reply').value='I saw it. Everyone agrees.';await g2.el('run').handlers.click();
+  assert.equal(g2.requests.length,3);assert.match(JSON.parse(g2.requests[1].options.body).contents[0].parts[0].text,/I saw it\./);
+  checks.push('Rewrite check: leftover flagged phrases, softened unsourced claims, and (Any text) dropped unflagged passages trigger one repair; a failed repair keeps the first revision');
   console.log(JSON.stringify({passed:checks.length,colorCombinations:combinations,failureCases,checks,liveApiCalled:false,limitation:'Mock API and minimal DOM; live English model behavior requires an actual API test.'},null,2));
 })().catch(e=>{console.error(e);process.exitCode=1;});
