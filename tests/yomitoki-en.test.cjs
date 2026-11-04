@@ -54,7 +54,7 @@ function permutations(a){return a.length?a.flatMap((v,i)=>permutations(a.filter(
   for(const page of [html,demoHtml]){
     assert.match(page,/<html lang="en">/);
     assert.equal(jp.test(page.replace(/<style>[\s\S]*?<\/style>/,'').replace(/<script>[\s\S]*?<\/script>/,'')),false);
-    for(const color of ['--shu:#C2452F','--midori:#2F7A4F','--kohaku:#9C6412','--ai:#2E4E9A'])assert.ok(page.includes(color));
+    for(const color of ['--shu:#FF2800','--midori:#35A16B','--kohaku:#CC79A7','--ai:#0041FF','--shu-deep:#E32400','--midori-deep:#2C8458','--kohaku-deep:#BB4D8A'])assert.ok(page.includes(color));
   }
   checks.push('Japanese criteria hash, four color values and English page metadata are preserved');
   const e=setup(),d=setup([],true);const types=Object.keys(e.api.TYPE_BADGE),flags=Object.keys(e.api.FLAG_DEF);
@@ -169,5 +169,10 @@ function permutations(a){return a.length?a.flatMap((v,i)=>permutations(a.filter(
   g2.el('mode-general').checked=true;g2.el('mode-general').handlers.change();g2.el('reply').value='I saw it. Everyone agrees.';await g2.el('run').handlers.click();
   assert.equal(g2.requests.length,3);assert.match(JSON.parse(g2.requests[1].options.body).contents[0].parts[0].text,/I saw it\./);
   checks.push('Rewrite check: leftover flagged phrases, softened unsourced claims, and (Any text) dropped unflagged passages trigger one repair; a failed repair keeps the first revision');
+  const md=setup([clone(first),clone(clean)]);md.el('reply').value='* **'+snapshot.reply+'**\n\n---';
+  await md.el('run').handlers.click();
+  assert.equal(md.el('reply').value,snapshot.reply.trim());assert.match(md.el('status').textContent,/Markdown symbols were removed/);
+  const sent=JSON.parse(md.requests[0].options.body).contents[0].parts[0].text;assert.doesNotMatch(sent,/###|\*\*|^---$/m);
+  checks.push('Markdown headings, bullets, bold and rules are removed before measuring; the input shows the cleaned text');
   console.log(JSON.stringify({passed:checks.length,colorCombinations:combinations,failureCases,checks,liveApiCalled:false,limitation:'Mock API and minimal DOM; live English model behavior requires an actual API test.'},null,2));
 })().catch(e=>{console.error(e);process.exitCode=1;});

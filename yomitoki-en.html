@@ -19,8 +19,13 @@
     --card:#FFFFFF;
     --shu:#FF2800;        /* 朱赤：根拠なき断定 */
     --midori:#35A16B;     /* 青緑：過剰肯定 */
-    --kohaku:#FF9900;     /* オレンジ：過剰な未来予測 */
+    --kohaku:#CC79A7;     /* 赤紫：過剰な未来予測（2型・1型で赤と潰れないよう、オレンジから変更） */
     --ai:#0041FF;         /* 青：出どころなき引用 */
+    /* 白い文字を載せる帯と、文字の色に使う深い色（白との対比4.5:1以上）。下線は上の明るい色のまま */
+    --shu-deep:#E32400;
+    --midori-deep:#2C8458;
+    --kohaku-deep:#BB4D8A;
+    --ai-deep:#0041FF;
     --display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
     --body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
   }
@@ -91,7 +96,7 @@
   .context-help,.context-note{font-size:12.5px;color:var(--ink-soft);line-height:1.7;margin-bottom:10px}
   .input-block label .opt{font-size:11px;font-weight:400;color:var(--ink-faint)}
   .input-block label .count{margin-left:auto;font-size:11px;font-weight:400;color:var(--ink-faint)}
-  .input-block label .count.over{color:var(--shu)}
+  .input-block label .count.over{color:var(--shu-deep)}
   textarea{
     width:100%;min-height:96px;padding:14px;border:1px solid var(--rule);border-radius:4px;
     font-family:var(--body);font-size:14px;line-height:1.8;background:var(--card);color:var(--ink);resize:vertical;
@@ -109,7 +114,7 @@
   button.run:disabled{background:var(--ink-faint);cursor:wait}
   button.run:focus-visible{outline:2px solid var(--shu);outline-offset:2px}
   .status{font-size:13px;color:var(--ink-soft)}
-  .status.error{color:var(--shu)}
+  .status.error{color:var(--shu-deep)}
 
   /* 凡例 */
   .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:28px 0 8px;font-size:12px;color:var(--ink-soft)}
@@ -119,7 +124,7 @@
   .key.k-mirai {text-decoration-color:var(--kohaku);text-decoration-style:solid}
   .key.k-inyou {text-decoration-color:var(--ai);text-decoration-style:solid}
   .legend-note{font-size:12px;color:var(--ink-soft);line-height:1.7;margin-bottom:16px}
-  .legend-note .demo-mark{color:var(--shu);font-weight:700;margin-right:6px}
+  .legend-note .demo-mark{color:var(--shu-deep);font-weight:700;margin-right:6px}
 
   /* 結果 */
   .result{display:none}
@@ -155,10 +160,10 @@
   .findings{margin-top:20px;border-top:1px dashed var(--rule);padding-top:16px;display:grid;gap:14px}
   .finding{font-size:13.5px;line-height:1.8}
   .finding .f-tag,.recheck .f-tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:2px;margin-right:8px;color:#fff;letter-spacing:.06em;vertical-align:1px}
-  .f-tag.t-dantei{background:var(--shu)}
-  .f-tag.t-koutei{background:var(--midori)}
-  .f-tag.t-mirai{background:var(--kohaku)}
-  .f-tag.t-inyou{background:var(--ai)}
+  .f-tag.t-dantei{background:var(--shu-deep)}
+  .f-tag.t-koutei{background:var(--midori-deep)}
+  .f-tag.t-mirai{background:var(--kohaku-deep)}
+  .f-tag.t-inyou{background:var(--ai-deep)}
   .f-quote{color:#151719;font-weight:500}
   .f-quote s{color:inherit;text-decoration:line-through;text-decoration-color:var(--shu);text-decoration-thickness:2px}
   .finding .f-note,.recheck .f-note{display:block;color:var(--ink-soft);margin-top:2px}
@@ -183,7 +188,7 @@
   /* 二周目 */
   .recheck{margin-top:18px;border-top:1px dashed var(--rule);padding-top:14px;font-size:13px;line-height:1.8;color:var(--ink-soft)}
   .recheck .rc-head{font-family:var(--display);font-size:13px;letter-spacing:.1em;color:var(--ink);margin-bottom:4px}
-  .recheck .rc-ok{color:var(--midori)}
+  .recheck .rc-ok{color:var(--midori-deep)}
   .recheck .rc-item{margin-top:6px}
   .recheck .rc-item .f-tag{font-size:10.5px}
 
@@ -313,6 +318,26 @@
   "use strict";
 
   var $ = function(id){ return document.getElementById(id); };
+
+  /* ── Remove Markdown symbols ──
+     An AI answer pasted as Markdown would have "###", "**" and "---" measured as sentences.
+     Strip the symbols before measuring and keep the words. Numbered items (1. 2.) are kept. */
+  function stripMarkdown(text){
+    var inFence = false;
+    var out = String(text || "").replace(/\r\n?/g, "\n").split("\n").map(function(line){
+      if(/^\s*(```|~~~)/.test(line)){ inFence = !inFence; return null; }
+      if(inFence) return line;
+      if(/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) return "";
+      return line
+        .replace(/^\s{0,3}#{1,6}\s+/, "")
+        .replace(/^\s{0,3}>\s?/, "")
+        .replace(/^(\s*)[*+-]\s+(?=\S)/, "$1")
+        .replace(/\*\*|__/g, "")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/!?\[([^\]]+)\]\([^)]*\)/g, "$1");
+    }).filter(function(line){ return line !== null; });
+    return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  }
 
   function store(key, val){ try{ localStorage.setItem(key, val); }catch(e){} }
   function recall(key){ try{ return localStorage.getItem(key) || ""; }catch(e){ return ""; } }
@@ -959,8 +984,11 @@ ENGLISH_REMINDER
     var mode = currentMode();
     var key   = $("apikey").value.trim();
     var model = MODEL;
-    var question = $("question").value.trim();
-    var reply    = $("reply").value.trim();
+    var question = stripMarkdown($("question").value);
+    var reply    = stripMarkdown($("reply").value);
+    // If symbols were removed, show the cleaned text so the page matches what was measured.
+    var mdStripped = reply !== $("reply").value.trim() || question !== $("question").value.trim();
+    if(mdStripped){ $("reply").value = reply; $("question").value = question; updateCount(); }
     var status = $("status");
 
     status.classList.remove("error");
@@ -1025,7 +1053,7 @@ ENGLISH_REMINDER
         if(isTrial && myRun === runId) return trialRequest("/finish", { sessionToken: trialSessionToken }, currentCtrl)
           .then(function(v){ trialRemaining = v.remaining; }).catch(function(){ /* the result is already shown */ });
       })
-      .then(function(){ if(myRun === runId){ stopTick(); status.setAttribute("aria-live", "polite"); status.textContent = "Inspection complete." + (isTrial ? (typeof trialRemaining === "number" ? " (Free: " + trialRemaining + " left today)" : " (Free)") : ""); } })
+      .then(function(){ if(myRun === runId){ stopTick(); status.setAttribute("aria-live", "polite"); status.textContent = "Inspection complete." + (mdStripped ? " (Markdown symbols were removed before inspection.)" : "") + (isTrial ? (typeof trialRemaining === "number" ? " (Free: " + trialRemaining + " left today)" : " (Free)") : ""); } })
       .catch(function(err){
         if(myRun !== runId) return;
         stopTick();
